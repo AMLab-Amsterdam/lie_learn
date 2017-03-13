@@ -21,7 +21,7 @@
 
 import numpy as np
 cimport numpy as np
-import lie_learn.spaces.Rn as Rn
+import lie_learn.spaces.rn as Rn
 
 FLOAT_TYPE = np.float64
 ctypedef np.float64_t FLOAT_TYPE_t
@@ -58,7 +58,7 @@ def invert(g, parameterization='MAT'):
     4: EAXXX    Euler angles (12 possible sets) (degrees)
     """
     g_mat = change_coordinates(g=g, p_from=parameterization, p_to='MAT', perform_checks=False)
-    g_mat_T = g_mat.transpose(range(0, g_mat.ndim - 2) + [g_mat.ndim - 1, g_mat.ndim - 2])  # Transpose last axes
+    g_mat_T = g_mat.transpose(list(range(0, g_mat.ndim - 2)) + [g_mat.ndim - 1, g_mat.ndim - 2])  # Transpose last axes
     return change_coordinates(g=g_mat_T, p_from='MAT', p_to=parameterization, perform_checks=False)
 
 def transform_r3(g, x, g_parameterization='MAT', x_parameterization='C'):

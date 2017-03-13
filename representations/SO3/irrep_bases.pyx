@@ -67,7 +67,7 @@ def change_of_basis_matrix(l, frm=('complex', 'seismology', 'centered', 'cs'), t
     Compute change-of-basis matrix that takes the 'frm' basis to the 'to' basis.
     Each basis is identified by:
      1) A field (real or complex)
-     2) A normalization / phase convention ('seismology', 'quantum', or 'geodesy')
+     2) A normalization / phase convention ('seismology', 'quantum', 'nfft', or 'geodesy')
      3) An ordering convention ('centered', 'block')
      4) Whether to use Condon-Shortley phase (-1)^m for m > 0 ('cs', 'nocs')
 
@@ -98,7 +98,7 @@ def change_of_basis_matrix(l, frm=('complex', 'seismology', 'centered', 'cs'), t
     # Make sure we're using CS-phase (this should work for both real and complex bases)
     if from_cs == 'nocs':
         m = np.arange(-l, l + 1)
-        B = ((-1) ** (m * (m > 0)))[:, None] * B
+        B = ((-1.) ** (m * (m > 0)))[:, None] * B
     elif from_cs != 'cs':
         raise ValueError('Invalid from_cs: ' + str(from_cs))
 
@@ -151,7 +151,7 @@ def change_of_basis_matrix(l, frm=('complex', 'seismology', 'centered', 'cs'), t
     if to_cs == 'nocs':
         # We're in CS phase now, so cancel it:
         m = np.arange(-l, l + 1)
-        B = ((-1) ** (m * (m > 0)))[:, None] * B
+        B = ((-1.) ** (m * (m > 0)))[:, None] * B
     elif to_cs != 'cs':
         raise ValueError('Invalid to_cs: ' + str(to_cs))
 
@@ -206,7 +206,7 @@ def change_of_basis_function(l, frm=('complex', 'seismology', 'centered', 'cs'),
 
     # Make sure we're using CS-phase (this should work for both real and complex bases)
     if from_cs == 'nocs':
-        p = ((-1) ** (ms * (ms > 0)))
+        p = ((-1.) ** (ms * (ms > 0)))
         f2 = lambda x: f1(x) * p
     elif from_cs == 'cs':
         f2 = f1
@@ -263,8 +263,8 @@ def change_of_basis_function(l, frm=('complex', 'seismology', 'centered', 'cs'),
     if to_cs == 'nocs':
         # We're in CS phase now, so cancel it:
         #m = np.arange(-l, l + 1)
-        #B = ((-1) ** (m * (m > 0)))[:, None] * B
-        p = ((-1) ** (ms * (ms > 0)))
+        #B = ((-1.) ** (m * (m > 0)))[:, None] * B
+        p = ((-1.) ** (ms * (ms > 0)))
         f6 = lambda x: f5(x) * p
     elif to_cs == 'cs':
         f6 = f5
@@ -310,13 +310,13 @@ def _cc2rc(l):
             if m == 0 and n == 0:
                 B[row_ind, col_ind] = np.sqrt(2)
             if m > 0 and m == n:
-                B[row_ind, col_ind] = (-1) ** m
+                B[row_ind, col_ind] = (-1.) ** m
             elif m > 0 and m == -n:
                 B[row_ind, col_ind] = 1.
             elif m < 0 and m == n:
                 B[row_ind, col_ind] = 1j
             elif m < 0 and m == -n:
-                B[row_ind, col_ind] = -1j * ((-1) ** m)
+                B[row_ind, col_ind] = -1j * ((-1.) ** m)
 
     return (1.0 / np.sqrt(2)) * B
 
@@ -348,9 +348,9 @@ def _cc2rc_func(np.ndarray[COMPLEX_TYPE_t, ndim=1] x,
     for i in range(m_arr.size):
         m = m_arr[i]
         if m > 0:
-            x_out[i] = ((-1) ** m * x[i] + x[i - 2 * m]).real * isq2
+            x_out[i] = ((-1.) ** m * x[i] + x[i - 2 * m]).real * isq2
         elif m < 0:
-            x_out[i] = (1j * x[i] - 1j * ((-1) ** m) * x[i - 2 * m]).real * isq2
+            x_out[i] = (1j * x[i] - 1j * ((-1.) ** m) * x[i - 2 * m]).real * isq2
         else:
             x_out[i] = x[i].real
 
@@ -375,7 +375,7 @@ def _rc2cc_func(np.ndarray[FLOAT_TYPE_t, ndim=1] x,
     for i in range(m_arr.size):
         m = m_arr[i]
         if m > 0:
-            x_out[i] = ((-1) ** m * x[i - 2 * m] * 1j + (-1) ** m * x[i]) * isq2
+            x_out[i] = ((-1.) ** m * x[i - 2 * m] * 1j + (-1.) ** m * x[i]) * isq2
         elif m < 0:
             x_out[i] = (-1j * x[i] + x[i - 2 * m]) * isq2
         else:
@@ -394,7 +394,7 @@ def _c2b(l, full_matrix=True):
     then B.dot(J_l).dot(B.T) is in block form with 4 blocks,
     as described by PH.
     """
-    k = int(l) / 2
+    k = int(l) // 2
     if l % 2 == 0:
         # Permutation as defined by Pinchon-Hoggan for 1-based indices,
         # and l = 2 k
@@ -502,7 +502,7 @@ def _nfft2quantum(l, full_matrix=False):
     #diagonal *= ((-1) ** (m * (m < 0)))
 
     m = np.arange(-l, l + 1)
-    diagonal *= (-1) ** m
+    diagonal *= (-1.) ** m
 
     if full_matrix:
         return np.diag(diagonal)

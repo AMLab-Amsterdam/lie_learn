@@ -6,7 +6,6 @@ import os
 
 import numpy as np
 from scipy.linalg import block_diag
-#from irrep_bases import *
 
 # Load the J-matrices, which are stored in the same folder as this file
 Jd = np.load(os.path.join(os.path.dirname(__file__), 'J_dense_0-278.npy'), encoding='latin1')
@@ -23,10 +22,6 @@ def SO3_irreps(g, irreps):
     # In theory, it may be faster to evaluate cos(x) once and then use
     # Chebyshev polynomials to obtain cos(n*x), but in practice this appears
     # to be slower than just evaluating cos(n*x).
-    #cosines = np.cos(g[:, :, None] * np.arange(l_max + 1))
-    #sines = np.sin(g[:, :, None] * np.arange(-l_max, l_max + 1))
-    #raise NotImplementedError("Not implemented yet")
-
     dim = np.sum(2 * np.array(irreps) + 1)
     T = np.empty((dim, dim, g.shape[1]))
     for i in range(g.shape[1]):

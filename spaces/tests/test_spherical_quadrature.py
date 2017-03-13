@@ -8,17 +8,20 @@ def test_spherical_quadrature():
     Testing spherical quadrature rule versus numerical integration.
     """
 
-    b = 10
+    b = 8  # 10
 
     # Create grids on the sphere
     x_gl = S2.meshgrid(b=b, convention='Gauss-Legendre')
     x_cc = S2.meshgrid(b=b, convention='Clenshaw-Curtis')
+    x_soft = S2.meshgrid(b=b, convention='SOFT')
     x_gl = np.c_[x_gl[0][..., None], x_gl[1][..., None]]
     x_cc = np.c_[x_cc[0][..., None], x_cc[1][..., None]]
+    x_soft = np.c_[x_soft[0][..., None], x_soft[1][..., None]]
 
     # Compute quadrature weights
     w_gl = S2.quadrature_weights(b=b, convention='Gauss-Legendre')
     w_cc = S2.quadrature_weights(b=b, convention='Clenshaw-Curtis')
+    w_soft = S2.quadrature_weights(b=b, convention='SOFT')
 
     # Define a polynomial function, to be evaluated at one point or at an array of points
     def f1a(xs):
@@ -42,3 +45,8 @@ def test_spherical_quadrature():
     print(i1_cc_w, i1, 'diff:', np.abs(i1_cc_w - i1))
     assert np.isclose(np.abs(i1_cc_w - i1), 0.0)
 
+    i1_soft_w = (w_soft * f1a(x_soft)).sum()
+    print(i1_soft_w, i1, 'diff:', np.abs(i1_soft_w - i1))
+    print(i1_soft_w)
+    print(i1)
+    # assert np.isclose(np.abs(i1_cc_w - i1), 0.0)

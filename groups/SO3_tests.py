@@ -1,6 +1,7 @@
 
 import numpy as np
-from SO3 import *
+from lie_learn.groups.SO3 import *
+
 
 def test_change_parameterization():
 

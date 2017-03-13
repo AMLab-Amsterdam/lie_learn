@@ -1,4 +1,4 @@
-from irrep_bases import *
+from lie_learn.representations.SO3.irrep_bases import *
 from .spherical_harmonics import *
 
 TEST_L_MAX = 5

@@ -82,6 +82,7 @@ def block_sh_ph(L_max, theta, phi):
 
     return TYc2
 
+
 def rsh(l, m, theta, phi, normalization='quantum', condon_shortley=True):
     """
     Compute the real spherical harmonic (RSH) S_l^m(theta, phi).
@@ -119,44 +120,30 @@ def rsh(l, m, theta, phi, normalization='quantum', condon_shortley=True):
     from CSH to RSH is unitary, the orthogonality and normalization properties are unchanged.
     :return: the value of the real spherical harmonic S^l_m(theta, phi)
     """
-    import time
-    #begin = time.time()
     l, m, theta, phi = np.broadcast_arrays(l, m, theta, phi)
-    #end =time.time()
-    #print '0', end-begin
     # Get the CSH for m and -m, using Condon-Shortley phase (regardless of whhether CS is requested or not)
     # The reason is that the code that changes from CSH to RSH assumes CS phase.
 
-
-    #begin = time.time()
     a = csh(l=l, m=m, theta=theta, phi=phi, normalization=normalization, condon_shortley=True)
-    #end=time.time()
-    #print '1', end-begin
-    #begin=time.time()
     b = csh(l=l, m=-m, theta=theta, phi=phi, normalization=normalization, condon_shortley=True)
-    #end=time.time()
-    #print '2', end-begin
 
     #if m > 0:
-    #    y = np.array((b + ((-1)**m) * a).real / np.sqrt(2.))
+    #    y = np.array((b + ((-1.)**m) * a).real / np.sqrt(2.))
     #elif m < 0:
-    #    y = np.array((1j * a - 1j * ((-1)**(-m)) * b).real / np.sqrt(2.))
+    #    y = np.array((1j * a - 1j * ((-1.)**(-m)) * b).real / np.sqrt(2.))
     #else:
     #    # For m == 0, the complex spherical harmonics are already real
     #    y = np.array(a.real)
 
-    #begin=time.time()
-    y = ((m > 0) * np.array((b + ((-1)**m) * a).real / np.sqrt(2.))
-         + (m < 0) * np.array((1j * a - 1j * ((-1)**(-m)) * b).real / np.sqrt(2.))
+    y = ((m > 0) * np.array((b + ((-1.)**m) * a).real / np.sqrt(2.))
+         + (m < 0) * np.array((1j * a - 1j * ((-1.)**(-m)) * b).real / np.sqrt(2.))
          + (m == 0) * np.array(a.real))
-    #end=time.time()
-    #print '3', end-begin
 
     if condon_shortley:
         return y
     else:
         # Cancel the CS phase of y (i.e. multiply by -1 when m is both odd and greater than 0)
-        return y * ((-1) ** (m * (m > 0)))
+        return y * ((-1.) ** (m * (m > 0)))
 
 
 def csh(l, m, theta, phi, normalization='quantum', condon_shortley=True):
@@ -205,17 +192,25 @@ def csh(l, m, theta, phi, normalization='quantum', condon_shortley=True):
     'seismology', 'quantum', 'geodesy', 'unnormalized', 'nfft'.
     :return: the value of the complex spherical harmonic Y^l_m(theta, phi)
     """
+    # NOTE: it seems like in the current version of scipy.special, sph_harm no longer accepts keyword arguments,
+    # so I'm removing them. I hope the order of args hasn't changed
     if normalization == 'quantum':
-        y = ((-1) ** m) * sph_harm(m, l, theta=phi, phi=theta)
+        # y = ((-1.) ** m) * sph_harm(m, l, theta=phi, phi=theta)
+        y = ((-1.) ** m) * sph_harm(m, l, phi, theta)
     elif normalization == 'seismology':
-        y = sph_harm(m, l, theta=phi, phi=theta)
+        # y = sph_harm(m, l, theta=phi, phi=theta)
+        y = sph_harm(m, l, phi, theta)
     elif normalization == 'geodesy':
-        y = np.sqrt(4 * np.pi) * sph_harm(m, l, theta=phi, phi=theta)
+        # y = np.sqrt(4 * np.pi) * sph_harm(m, l, theta=phi, phi=theta)
+        y = np.sqrt(4 * np.pi) * sph_harm(m, l, phi, theta)
     elif normalization == 'unnormalized':
-        y = sph_harm(m, l, theta=phi, phi=theta) / np.sqrt((2 * l + 1) * factorial(l - m) /
-                                                           (4 * np.pi * factorial(l + m)))
+        # y = sph_harm(m, l, theta=phi, phi=theta) / np.sqrt((2 * l + 1) * factorial(l - m) /
+        #                                                    (4 * np.pi * factorial(l + m)))
+        y = sph_harm(m, l, phi, theta) / np.sqrt((2 * l + 1) * factorial(l - m) /
+                                                 (4 * np.pi * factorial(l + m)))
     elif normalization == 'nfft':
-        y = sph_harm(m, l, theta=phi, phi=theta) / np.sqrt((2 * l + 1) / (4 * np.pi))
+        # y = sph_harm(m, l, theta=phi, phi=theta) / np.sqrt((2 * l + 1) / (4 * np.pi))
+        y = sph_harm(m, l, phi, theta) / np.sqrt((2 * l + 1) / (4 * np.pi))
     else:
         raise ValueError('Unknown normalization convention:' + str(normalization))
 
@@ -224,9 +219,10 @@ def csh(l, m, theta, phi, normalization='quantum', condon_shortley=True):
         return y
     else:
         # Cancel the CS phase in sph_harm (i.e. multiply by -1 when m is both odd and greater than 0)
-        return y * ((-1) ** (m * (m > 0)))
+        return y * ((-1.) ** (m * (m > 0)))
 
-## For testing only:
+
+# For testing only:
 def _naive_csh_unnormalized(l, m, theta, phi):
     """
     Compute unnormalized SH
@@ -271,7 +267,7 @@ def _naive_csh_ph(l, m, theta, phi):
         return phase * normalizer * P * e
 
 
-def naive_rsh_ph(l, m, theta, phi):
+def _naive_rsh_ph(l, m, theta, phi):
 
     if m == 0:
         return np.sqrt((2 * l + 1.) / (4 * np.pi)) * lpmv(m, l, np.cos(theta))

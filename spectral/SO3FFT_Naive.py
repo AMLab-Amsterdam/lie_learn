@@ -3,30 +3,103 @@ import numpy as np
 
 from lie_learn.representations.SO3.irrep_bases import change_of_basis_matrix
 from lie_learn.representations.SO3.pinchon_hoggan.pinchon_hoggan_dense import rot_mat, Jd
+from lie_learn.representations.SO3.wigner_d import wigner_d_matrix
+from lie_learn.spaces.S3 import quadrature_weights
 
 from .FFTBase import FFTBase
 from scipy.fftpack import fft2, ifft2, fftshift
 
-## TODO:
+# TODO:
 # Write testing code for these FFTs
 # Write fast code for the real, quantum-normalized, centered / block-diagonal bases.
 
 class SO3_FFT_NaiveComplex(FFTBase):
 
-    def __init__(self, L_max, d=None, L2_normalized=True):
+    def __init__(self, L_max, d=None, w=None, L2_normalized=True):
+
+        super().__init__()
 
         if d is None:
-            self.d = self.setup_d_transform(b=L_max + 1, J_dense=Jd, L2_normalized=L2_normalized)
+            self.d = setup_d_transform(b=L_max + 1, L2_normalized=L2_normalized)
 
-        # TODO: compute quadrature weights for analyze() transform
+        if w is None:
+            self.w = quadrature_weights(b=L_max + 1)
 
     def analyze(self, f):
-        raise NotImplementedError('SO3 analyze function not implemented yet')
+        """
+        Compute the complex SO(3) Fourier transform of f.
+
+        The standard way to define the FT is:
+        \hat{f}^l_mn = (2 J + 1)/(8 pi^2) *
+           int_0^2pi da int_0^pi db sin(b) int_0^2pi dc f(a,b,c) D^{l*}_mn(a,b,c)
+
+        The normalizing constant comes about because:
+        int_SO(3) D^*(g) D(g) dg = 8 pi^2 / (2 J + 1)
+        where D is any Wigner D function D^l_mn. Note that the factor 8 pi^2 (the volume of SO(3))
+        goes away if we integrate with the normalized Haar measure.
+
+        This function computes the FT using the normalized D functions:
+        \tilde{D} = 1/2pi sqrt((2J+1)/2) D
+        where D are the rotation matrices in the basis of complex, seismology-normalized, centered spherical harmonics.
+
+        Hence, this function computes:
+        \hat{f}^l_mn = \int_SO(3) f(g) \tilde{D}^{l*}_mn(g) dg
+
+        So that the FT of f = \tilde{D}^l_mn is 1 at (l,m,n) (and zero elsewhere).
+
+        Args:
+          f: an array of shape (2B, 2B, 2B), where B is the bandwidth.
+
+        Returns:
+          f_hat: the Fourier transform of f. A list of length B,
+          where entry l contains an 2l+1 by 2l+1 array containing the projections
+          of f onto matrix elements of the l-th irreducible representation of SO(3).
+
+        Main source:
+        SOFT: SO(3) Fourier Transforms
+        Peter J. Kostelec and Daniel N. Rockmore
+
+        Further information:
+        Generalized FFTs-a survey of some recent results
+        Maslen & Rockmore
+
+        Engineering Applications of Noncommutative Harmonic Analysis.
+        9.5 - Sampling and FFT for SO(3) and SU(2)
+        G.S. Chrikjian, A.B. Kyatkin
+        """
+        assert f.shape[0] == f.shape[1]
+        assert f.shape[1] == f.shape[2]
+        assert f.shape[0] % 2 == 0
+        b = f.shape[0] // 2
+
+        # First, FFT along the alpha and gamma axes (axis 0 and 2, respectively)
+        F = fft2(f, axes=(0, 2))
+        F = fftshift(F, axes=(0, 2))
+        f0 = F.shape[0] // 2  # The index of the 0-frequency / DC component
+
+        # Apply quadrature weights (TODO: should we apply these to the values of F instead?)
+        d = [self.d[l] * self.w[None, :, None] for l in range(b)]
+
+        f_hat = []
+        Z = 2 * np.pi / ((2 * b) ** 2)  # Normalizing constant
+        for l in range(b):
+            # Dot the vectors F_mn and d_mn over the middle axis (beta),
+            # where -l <= m,n <= l, which corresponds to
+            # f0 - l <= m,n <= f0 + l + 1
+            # for 0-based indexing and zero-frequency location f0
+            f_hat.append(
+                np.sum(d[l] * F[f0 - l:f0 + l + 1, :, f0 - l:f0 + l + 1], axis=1) * Z
+            )
+        return f_hat
 
     def synthesize(self, f_hat):
         """
+        Perform the inverse (spectral to spatial) SO(3) Fourier transform.
+
+        :param f_hat: a list of matrices of with shapes [1x1, 3x3, 5x5, ..., 2 L_max + 1 x 2 L_max + 1]
+
         """
-        b = len(self.d)
+        b = len(self.d)  # bandwidth
 
         # Perform the brute-force Legendre transform
         # Note: the frequencies where m=-B or n=-B are set to zero,
@@ -41,46 +114,6 @@ class SO3_FFT_NaiveComplex(FFTBase):
         F = fftshift(F, axes=(0, 2))
         f = ifft2(F, axes=(0, 2))
         return f * (2 * b) ** 2
-
-
-    @staticmethod
-    def setup_d_transform(b, J_dense, L2_normalized):
-        """
-
-        """
-
-        # We know how to efficiently compute d functions in the real basis using
-        # Pinchon-Hoggans approach (d_real = J X(beta) J), but we want them in the
-        # basis of complex centered spherical harmonics Y^{-l}, ..., Y^{l}.
-        # These matrices perform that change of basis
-        #C2R = [get_sh_change_of_basis(l,
-        #                              frm=('complex', 'seismology', 'centered'),
-        #                              to=('real', 'quantum', 'centered'))
-        #       for l in range(b)]
-        C2R = [change_of_basis_matrix(l,
-                                      frm=('complex', 'seismology', 'centered', 'cs'),
-                                      to=('real', 'quantum', 'centered', 'cs'))
-               for l in range(b)]
-
-        # Compute array of beta values as described in SOFT 2.0 documentation.
-        beta = np.pi * (2 * np.arange(0, 2 * b) + 1) / (4. * b)
-
-        # Compute d matrices in real basis (fast, stable),
-        # then change them to complex basis (where the d-funcs are still real):
-        d = [np.array([rot_mat(0, bt, 0, l, J_dense[l])
-                       for bt in beta])
-             for l in range(b)]
-        d = [C2R[l].conj().T.dot(d[l]).dot(C2R[l]).real
-             for l in range(b)]
-
-        if L2_normalized:
-            # The Unitary matrix elements have norm:
-            # | U^\lambda_mn |^2 = 1/(2l+1)
-            # where the 2-norm is defined in terms of normalized Haar measure.
-            # So T = sqrt(2l + 1) U are L2-normalized functions
-            d = [d[l] * np.sqrt(2 * l + 1) for l in range(len(d))]
-
-        return d
 
 
 class SO3_FFT_NaiveReal(FFTBase):
@@ -140,8 +173,7 @@ def SO3_fft(f, d=None, w=None):
     Returns:
       f_hat: the Fourier transform of f. A list of length B,
       where entry l contains an 2l+1 by 2l+1 array containing the projections
-      of f onto matrix elements of the l-th irreducible representation of
-      SO(3).
+      of f onto matrix elements of the l-th irreducible representation of SO(3).
 
     Main source:
     SOFT: SO(3) Fourier Transforms
@@ -163,14 +195,18 @@ def SO3_fft(f, d=None, w=None):
     # First, FFT along the alpha and gamma axes (axis 0 and 2, respectively)
     # We use the inverse FFT (ifft) here, because the np.fft sign convention
     # for alpha and gamma is reversed relative to our D functions.
-    #F = np.fft.ifft2(f.conj(), axes=(0, 2)).conj()
+    # F = np.fft.ifft2(f.conj(), axes=(0, 2)).conj()
     F = fft2(f, axes=(0, 2))
     F = fftshift(F, axes=(0, 2))
     f0 = F.shape[0] / 2  # The index of the 0-frequency / DC component
 
     if d is None:
-        # TODO: compute weights separately.
-        d = setup_d_transform(b, weight=True)
+        d = setup_d_transform(b, L2_normalized=True)  # not 100% sure L2_normalized should be True
+
+    if w is None:
+        w = quadrature_weights(b)
+
+    d = [d[l] * w[None, :, None] for l in range(b)]
 
     f_hat = []
     Z = 2 * np.pi / ((2 * b) ** 2)  # Normalizing constant
@@ -179,8 +215,9 @@ def SO3_fft(f, d=None, w=None):
         # where -l <= m,n <= l, which corresponds to
         # f0 - l <= m,n <= f0 + l + 1
         # for 0-based indexing and zero-frequency location f0
-        f_hat.append(np.sum(d[l] * F[f0 - l:f0 + l + 1, :, f0 - l:f0 + l + 1],
-                            axis=1) * Z)
+        f_hat.append(
+            np.sum(d[l] * F[f0 - l:f0 + l + 1, :, f0 - l:f0 + l + 1], axis=1) * Z
+        )
     return f_hat
 
 
@@ -202,63 +239,32 @@ def SO3_ifft(f_hat, d):
     return f * 2 * (b ** 2) / np.pi
 
 
-def setup_d_transform(b, J_dense):
+def setup_d_transform(b, L2_normalized,
+                      field='complex', normalization='seismology', order='centered', condon_shortley='cs'):
     """
 
     """
-
-    # We know how to efficiently compute d functions in the real basis using
-    # Pinchon-Hoggans approach (d_real = J X(beta) J), but we want them in the
-    # basis of complex centered spherical harmonics Y^{-l}, ..., Y^{l}.
-    # These matrices perform that change of basis
-    ##C2R = [cc2rcph(l) for l in range(b)]
-    #C2R = [get_sh_change_of_basis(l,
-    #                              frm=('complex', 'seismology', 'centered'),
-    #                              to=('real', 'quantum', 'centered'))
-    #       for l in range(b)]
-    C2R = [change_of_basis_matrix(l,
-                                  frm=('complex', 'seismology', 'centered', 'cs'),
-                                  to=('real', 'quantum', 'centered', 'cs'))
-           for l in range(b)]
-
     # Compute array of beta values as described in SOFT 2.0 documentation.
     beta = np.pi * (2 * np.arange(0, 2 * b) + 1) / (4. * b)
 
-    # Compute d matrices in real basis (fast, stable),
-    # then change them to complex basis (where the d-funcs are still real):
-    d = [np.array([rot_mat(0, bt, 0, l, J_dense[l])
-                   for bt in beta])
+    # For each l=0,...,b-1, we compute a 3D tensor of shape (2l+1, 2b, 2l+1)
+    # The middle index corresponds to beta, the outer indices are m, n that identify the matrix element d^l_mn
+    d = [np.array([wigner_d_matrix(l, bt,
+                                   field=field, normalization=normalization,
+                                   order=order, condon_shortley=condon_shortley)
+                   for bt in beta]).transpose(1, 0, 2)
          for l in range(b)]
-    d = [C2R[l].conj().T.dot(d[l]).dot(C2R[l]).real
-         for l in range(b)]
-    #d = [np.array([wignerd_mat(l, b, approx_lim=100000)
-    #               for b in beta]).transpose(1, 0, 2)
-    #     for l in range(B)]
 
-    # We want the L2 normalized functions:
-    d = [d[l] * np.sqrt(l + 0.5) for l in range(len(d))]
+    if L2_normalized:  # TODO: this should be integrated in the normalization spec above
+        # The Unitary matrix elements have norm:
+        # | U^\lambda_mn |^2 = 1/(2l+1)
+        # where the 2-norm is defined in terms of normalized Haar measure. [Haar measure on SO(3) or SO(2)? SO3 probs]
+        # So T = sqrt(2l + 1) U are L2-normalized functions
+        d = [d[l] * np.sqrt(2 * l + 1) for l in range(len(d))]
 
-    # Construct quadrature weights w
-    # NO: this should be separate so that we can use the same d for forward and backward transforms
-    """if weight:
-        k = np.arange(0, b)
-        w = np.array([(2. / b) * np.sin(np.pi * (2. * j + 1.) / (4. * b)) *
-                      (np.sum((1. / (2 * k + 1))
-                              * np.sin((2 * j + 1) * (2 * k + 1)
-                                       * np.pi / (4. * b))))
-                      for j in range(2 * b)])
-        # In the SOFT source, they talk about the following weights being used for
-        # odd-order transforms. Do not understand this, and the weights used above
-        # (defined in the SOFT papers) seems to work.
-        #w = np.array([(2. / B) *
-        #              (np.sum((1. / (2 * k + 1))
-        #                      * np.sin((2 * j + 1) * (2 * k + 1)
-        #                               * np.pi / (4. * B))))
-        #              for j in range(2 * B)])
+        # We want the L2 normalized functions:
+        # d = [d[l] * np.sqrt(l + 0.5) for l in range(len(d))]
 
-        # Apply quadrature weights to the wigner d function samples:
-        d = [d[l] * w[None, :, None] for l in range(b)]
-    """
     return d
 
 

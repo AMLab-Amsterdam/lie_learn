@@ -10,6 +10,9 @@ def change_coordinates(coords, p_from='C', p_to='S'):
     """
     Change Spherical to Cartesian coordinates and vice versa, for points x in S^2.
 
+    In the spherical system, we have coordinates theta and phi,
+    where theta in [0, pi] and phi in [0, 2pi]
+
     :param conversion:
     :param coords:
     :return:
@@ -100,8 +103,8 @@ def linspace(b, convention='Driscoll-Healy'):
         theta = np.pi * (2 * np.arange(2 * b) + 1) / (4. * b)
         phi = np.arange(2 * b) * np.pi / b
     elif convention == 'Clenshaw-Curtis':
-        #theta = np.arange(2 * b + 1) * np.pi / (2 * b)
-        #phi = np.arange(2 * b + 2) * np.pi / (b + 1)
+        # theta = np.arange(2 * b + 1) * np.pi / (2 * b)
+        # phi = np.arange(2 * b + 2) * np.pi / (b + 1)
         # Must use np.linspace to prevent numerical errors that cause theta > pi
         theta = np.linspace(0, np.pi, 2 * b + 1)
         phi = np.linspace(0, 2 * np.pi, 2 * b + 2, endpoint=False)
@@ -143,8 +146,8 @@ def quadrature_weights(b, convention='Gauss-Legendre'):
     if convention == 'Clenshaw-Curtis':
         # There is a faster fft based method to compute these weights
         # see "Fast evaluation of quadrature formulae on the sphere"
-        #W = np.empty((2 * b + 2, 2 * b + 1))
-        #for j in range(2 * b + 1):
+        # W = np.empty((2 * b + 2, 2 * b + 1))
+        # for j in range(2 * b + 1):
         #    eps_j_2b = 0.5 if j == 0 or j == 2 * b else 1.
         #    for k in range(2 * b + 2):  # Doesn't seem to depend on k..
         #        W[k, j] = (4 * np.pi * eps_j_2b) / (b * (2 * b + 2))
@@ -162,6 +165,17 @@ def quadrature_weights(b, convention='Gauss-Legendre'):
         # eq. 10
         _, w = leggauss(b + 1)
         W = w[None, :] * (2 * np.pi / (2 * b + 2) * np.ones(2 * b + 2)[:, None])
+    elif convention == 'SOFT':
+
+        print("WARNING: SOFT quadrature weights don't work yet")
+
+        k = np.arange(0, b)
+        w = np.array([(2. / b) * np.sin(np.pi * (2. * j + 1.) / (4. * b)) *
+                      (np.sum((1. / (2 * k + 1))
+                              * np.sin((2 * j + 1) * (2 * k + 1)
+                                       * np.pi / (4. * b))))
+                      for j in range(2 * b)])
+        W = w[None, :] * np.ones(2 * b)[:, None]
     else:
         raise ValueError('Unknown convention:' + str(convention))
 
