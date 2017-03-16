@@ -5,55 +5,133 @@ from lie_learn.representations.SO3.pinchon_hoggan.pinchon_hoggan_dense import Jd
 from lie_learn.representations.SO3.irrep_bases import change_of_basis_matrix
 
 
-def wigner_d_matrix(l, beta, field='real', normalization='quantum', order='centered', condon_shortley='cs'):
+def wigner_d_matrix(l, beta,
+                    field='real', normalization='quantum', order='centered', condon_shortley='cs'):
     """
     Compute the Wigner-d matrix of degree l at beta, in the basis defined by
     (field, normalization, order, condon_shortley)
 
     The Wigner-d matrix of degree l has shape (2l + 1) x (2l + 1).
+
+    :param l: the degree of the Wigner-d function. l >= 0
+    :param beta: the argument. 0 <= beta <= pi
+    :param field: 'real' or 'complex'
+    :param normalization: 'quantum', 'seismology', 'geodesy' or 'nfft'
+    :param order: 'centered' or 'block'
+    :param condon_shortley: 'cs' or 'nocs'
+    :return: d^l_mn(beta) in the chosen basis
     """
-    # I think that this will return the d matrix in the (real, quantum-normalized, centered, cs) convention
-    # TODO check this
+    # This returns the d matrix in the (real, quantum-normalized, centered, cs) convention
     d = rot_mat(alpha=0., beta=beta, gamma=0., l=l, J=Jd[l])
 
-    B = change_of_basis_matrix(
-        l,
-        frm=('real', 'quantum', 'centered', 'cs'),
-        to=(field, normalization, order, condon_shortley))
-    BB = change_of_basis_matrix(
-        l,
-        frm=(field, normalization, order, condon_shortley),
-        to=('real', 'quantum', 'centered', 'cs'))
-    d = B.dot(d).dot(BB)
+    if (field, normalization, order, condon_shortley) != ('real', 'quantum', 'centered', 'cs'):
+        # TODO use change of basis function instead of matrix?
+        B = change_of_basis_matrix(
+            l,
+            frm=('real', 'quantum', 'centered', 'cs'),
+            to=(field, normalization, order, condon_shortley))
+        BB = change_of_basis_matrix(
+            l,
+            frm=(field, normalization, order, condon_shortley),
+            to=('real', 'quantum', 'centered', 'cs'))
+        d = B.dot(d).dot(BB)
 
-    # The Wigner-d matrices are always real, even in the complex basis
-    # (I tested this numerically, and have seen it in several texts)
-    # assert np.isclose(np.sum(np.abs(d.imag)), 0.0)
-    d = d.real
+        # The Wigner-d matrices are always real, even in the complex basis
+        # (I tested this numerically, and have seen it in several texts)
+        # assert np.isclose(np.sum(np.abs(d.imag)), 0.0)
+        d = d.real
 
     return d
 
 
 def wigner_D_matrix(l, alpha, beta, gamma,
                     field='real', normalization='quantum', order='centered', condon_shortley='cs'):
+    """
+    Evaluate the Wigner-d matrix D^l_mn(alpha, beta, gamma)
+
+    :param l: the degree of the Wigner-d function. l >= 0
+    :param alpha: the argument. 0 <= alpha <= 2 pi
+    :param beta: the argument. 0 <= beta <= pi
+    :param gamma: the argument. 0 <= gamma <= 2 pi
+    :param field: 'real' or 'complex'
+    :param normalization: 'quantum', 'seismology', 'geodesy' or 'nfft'
+    :param order: 'centered' or 'block'
+    :param condon_shortley: 'cs' or 'nocs'
+    :return: D^l_mn(alpha, beta, gamma) in the chosen basis
+    """
 
     D = rot_mat(alpha=alpha, beta=beta, gamma=gamma, l=l, J=Jd[l])
 
-    B = change_of_basis_matrix(
-        l,
-        frm=('real', 'quantum', 'centered', 'cs'),
-        to=(field, normalization, order, condon_shortley))
-    D = B.dot(D).dot(B.conj().T)
+    if (field, normalization, order, condon_shortley) != ('real', 'quantum', 'centered', 'cs'):
+        B = change_of_basis_matrix(
+            l,
+            frm=('real', 'quantum', 'centered', 'cs'),
+            to=(field, normalization, order, condon_shortley))
+        D = B.dot(D).dot(B.conj().T)
 
-    if field == 'real':
-        # print('WIGNER D IMAG PART:', np.sum(np.abs(D.imag)))
-        assert np.isclose(np.sum(np.abs(D.imag)), 0.0)
-        D = D.real
+        if field == 'real':
+            # print('WIGNER D IMAG PART:', np.sum(np.abs(D.imag)))
+            assert np.isclose(np.sum(np.abs(D.imag)), 0.0)
+            D = D.real
 
     return D
 
 
-def naive_wigner_d(l, m, n, beta):
+def wigner_d_function(l, m, n, beta,
+                      field='real', normalization='quantum', order='centered', condon_shortley='cs'):
+    """
+    Evaluate a single Wigner-d function d^l_mn(beta)
+
+    NOTE: for now, we implement this by computing the entire degree-l Wigner-d matrix and then selecting
+    the (m,n) element, so this function is not fast.
+
+    :param l: the degree of the Wigner-d function. l >= 0
+    :param m: the order of the Wigner-d function. -l <= m <= l
+    :param n: the order of the Wigner-d function. -l <= n <= l
+    :param beta: the argument. 0 <= beta <= pi
+    :param field: 'real' or 'complex'
+    :param normalization: 'quantum', 'seismology', 'geodesy' or 'nfft'
+    :param order: 'centered' or 'block'
+    :param condon_shortley: 'cs' or 'nocs'
+    :return: d^l_mn(beta) in the chosen basis
+    """
+    return wigner_d_matrix(l, beta, field, normalization, order, condon_shortley)[l + m, l + n]
+
+
+def wigner_D_function(l, m, n, alpha, beta, gamma,
+                      field='real', normalization='quantum', order='centered', condon_shortley='cs'):
+    """
+    Evaluate a single Wigner-d function d^l_mn(beta)
+
+    NOTE: for now, we implement this by computing the entire degree-l Wigner-D matrix and then selecting
+    the (m,n) element, so this function is not fast.
+
+    :param l: the degree of the Wigner-d function. l >= 0
+    :param m: the order of the Wigner-d function. -l <= m <= l
+    :param n: the order of the Wigner-d function. -l <= n <= l
+    :param alpha: the argument. 0 <= alpha <= 2 pi
+    :param beta: the argument. 0 <= beta <= pi
+    :param gamma: the argument. 0 <= gamma <= 2 pi
+    :param field: 'real' or 'complex'
+    :param normalization: 'quantum', 'seismology', 'geodesy' or 'nfft'
+    :param order: 'centered' or 'block'
+    :param condon_shortley: 'cs' or 'nocs'
+    :return: d^l_mn(beta) in the chosen basis
+    """
+    return wigner_D_matrix(l, alpha, beta, gamma, field, normalization, order, condon_shortley)[l + m, l + n]
+
+
+def wigner_d_naive(l, m, n, beta):
+    """
+    Numerically naive implementation of the Wigner-d function.
+    This is useful for checking the correctness of other implementations.
+
+    :param l: the degree of the Wigner-d function. l >= 0
+    :param m: the order of the Wigner-d function. -l <= m <= l
+    :param n: the order of the Wigner-d function. -l <= n <= l
+    :param beta: the argument. 0 <= beta <= pi
+    :return: d^l_mn(beta) in the TODO: what basis? complex, quantum(?), centered, cs(?)
+    """
     from scipy.special import eval_jacobi
     from scipy.misc import factorial
 
@@ -81,7 +159,7 @@ def naive_wigner_d(l, m, n, beta):
     return xi * z * np.sin(beta / 2) ** mu * np.cos(beta / 2) ** nu * jac
 
 
-def naive_wigner_d_v2(l, m, n, beta):
+def wigner_d_naive_v2(l, m, n, beta):
     """
     Wigner d functions as defined in the SOFT 2.0 documentation.
     When approx_lim is set to a high value, this function appears to give
@@ -108,30 +186,30 @@ def naive_wigner_d_v2(l, m, n, beta):
     return xi * sq * sinb * cosb * P
 
 
-def naive_wigner_d_v3(l, m, n, approx_lim=1000000):
-    '''
-        Wigner "small d" matrix. (Euler z-y-z convention)
-        example:
-            l = 2
-            m = 1
-            n = 0
-            beta = linspace(0,pi,100)
-            wd210 = wignerd(l,m,n)(beta)
+def wigner_d_naive_v3(l, m, n, approx_lim=1000000):
+    """
+    Wigner "small d" matrix. (Euler z-y-z convention)
+    example:
+        l = 2
+        m = 1
+        n = 0
+        beta = linspace(0,pi,100)
+        wd210 = wignerd(l,m,n)(beta)
 
-        some conditions have to be met:
-             l >= 0
-            -l <= m <= l
-            -l <= n <= l
+    some conditions have to be met:
+         l >= 0
+        -l <= m <= l
+        -l <= n <= l
 
-        The approx_lim determines at what point
-        bessel functions are used. Default is when:
-            l > m+10
-              and
-            l > n+10
+    The approx_lim determines at what point
+    bessel functions are used. Default is when:
+        l > m+10
+          and
+        l > n+10
 
-        for integer l and n=0, we can use the spherical harmonics. If in
-        addition m=0, we can use the ordinary legendre polynomials.
-    '''
+    for integer l and n=0, we can use the spherical harmonics. If in
+    addition m=0, we can use the ordinary legendre polynomials.
+    """
     from scipy.special import jv, legendre, sph_harm, jacobi
     from scipy.misc import factorial, comb
     from numpy import floor, sqrt, sin, cos, exp, power

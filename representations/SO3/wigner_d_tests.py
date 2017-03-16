@@ -1,18 +1,19 @@
 
 import numpy as np
 
-from lie_learn.representations.SO3.wigner_d import wigner_D_matrix, wigner_d_matrix, naive_wigner_d, naive_wigner_d_v2, naive_wigner_d_v3
+from lie_learn.representations.SO3.wigner_d import wigner_D_matrix, wigner_d_matrix,\
+    wigner_d_naive, wigner_d_naive_v2, wigner_d_naive_v3, wigner_d_function, wigner_D_function
 import lie_learn.spaces.S3 as S3
 
-TEST_L_MAX = 2
+TEST_L_MAX = 3
 
-
-def check_unitary():
+def check_unitarity_wigner_D():
     """
     Check that the Wigner-D matrices are unitary.
     We test every normalization convention and a range of input angles.
 
-    :return:
+    Note: only the quantum- or seismology normalized Wigner-D matrices are unitary,
+    so we do not check the geodesy and nfft normalized matrices.
     """
     for l in range(TEST_L_MAX):
         for field in ('real', 'complex'):
@@ -33,16 +34,17 @@ def check_normalization_wigner_D():
     """
     According to [1], the Wigner D functions satisfy:
 
-    int_0^2pi da int_0^pi db sin(b) int_0^2pi D^l_mn(a,b,c) D^l_mn(a,b,c)* = 8 pi^2 / (2l+1)
+    int_0^2pi da int_0^pi db sin(b) int_0^2pi |D^l_mn(a,b,c)|^2 = 8 pi^2 / (2l+1)
 
     The factor 8 pi^2 is removed if we integrate with respect to the normalized Haar measure.
-    The normalization constant 1 / (2l + 1) can vary depending on the convention.
+    The normalization constant 1 / (2l + 1) can vary depending on the normalization convention.
 
     Here we test this equality by numerical integration.
-    :return:
+
+    NOTE: this test is subsumed in check_orthogonality_wigner_D
     """
-    # The squared L2 norm for each of the normalizations
-    # By L2 norm of f we mean int_SO(3) |f(g)|^2 dg, where dg is the normalized Haar measure
+    # The squared L2 norm for each of the normalization conventions
+    # By squared L2 norm of f we mean |f|^2 = int_SO(3) |f(g)|^2 dg, where dg is the normalized Haar measure
     L2_norm = {
         'quantum': lambda l: 1. / (2 * l + 1),
         'seismology': lambda l: 1. / (2 * l + 1),
@@ -61,7 +63,7 @@ def check_normalization_wigner_D():
                                 f = lambda a, b, c: np.abs(wigner_D_matrix(
                                     l=l, alpha=a, beta=b, gamma=c,
                                     field=field, normalization=normalization,
-                                    order=order, condon_shortley=condon_shortley)[m, n]) ** 2
+                                    order=order, condon_shortley=condon_shortley)[l + m, l + n]) ** 2
 
                                 val = S3.integrate(f, normalize=True)
                                 print(l, m, n, field, normalization, order, condon_shortley, val, L2_norm[normalization](l))
@@ -77,18 +79,12 @@ def check_orthogonality_wigner_D():
       8 pi^2 / (2l+1) delta(ll') delta(mm') delta(nn')
 
     The factor 8 pi^2 is removed if we integrate with respect to the normalized Haar measure.
-    The normalization constant 1 / (2l + 1) can vary depending on the convention.
+    The normalization constant 1 / (2l + 1) can vary depending on the normalization convention.
 
     Here we test this equality by numerical integration.
-
-    Warning: thus function takes a long time to run.
-    :return:
     """
-    # Note: this function is called "check" not "test" because this function is expensive to evaluate and we don't
-    # want to automatically call this when running nosetests.
-
     # The squared L2 norm for each of the normalizations
-    # By L2 norm of f we mean int_SO(3) |f(g)|^2 dg, where dg is the normalized Haar measure
+    # By squared L2 norm of f we mean |f|^2 = int_SO(3) |f(g)|^2 dg, where dg is the normalized Haar measure
     L2_norm = {
         'quantum': lambda l: 1. / (2 * l + 1),
         'seismology': lambda l: 1. / (2 * l + 1),
@@ -106,7 +102,8 @@ def check_orthogonality_wigner_D():
                                 for l2 in range(TEST_L_MAX):
                                     for m2 in range(-l2, l2 + 1):
                                         for n2 in range(-l2, l2 + 1):
-                                            f = lambda a, b, c: wigner_D_matrix(
+
+                                            """f = lambda a, b, c: wigner_D_matrix(
                                                     l=l, alpha=a, beta=b, gamma=c,
                                                     field=field, normalization=normalization,
                                                     order=order, condon_shortley=condon_shortley)[m, n] * \
@@ -114,87 +111,56 @@ def check_orthogonality_wigner_D():
                                                     l=l2, alpha=a, beta=b, gamma=c,
                                                     field=field, normalization=normalization,
                                                     order=order, condon_shortley=condon_shortley)[m2, n2].conj()
+                                            """
 
-                                            val = S3.integrate(f, normalize=True)
+                                            f = lambda a, b, c:\
+                                                wigner_D_function(
+                                                    l=l, m=m, n=n, alpha=a, beta=b, gamma=c,
+                                                    field=field, normalization=normalization,
+                                                    order=order, condon_shortley=condon_shortley) * \
+                                                wigner_D_function(
+                                                    l=l2, m=m2, n=n2, alpha=a, beta=b, gamma=c,
+                                                    field=field, normalization=normalization,
+                                                    order=order, condon_shortley=condon_shortley).conj()
+
+                                            numerical_norm = S3.integrate(f, normalize=True)
+                                            analytical_norm = L2_norm[normalization](l) \
+                                                              * (l == l2) * (m == m2) * (n == n2)
                                             print(field, normalization, order, condon_shortley, l, m, n, l2, m2, n2,
-                                                  np.round(val, 2),
-                                                  np.round(L2_norm[normalization](l) * (l == l2) * (m == m2) * (n == n2), 2))
-                                            assert np.isclose(val, L2_norm[normalization](l) * (l == l2) * (m == m2) * (n == n2))
+                                                  np.round(numerical_norm, 2),
+                                                  np.round(analytical_norm, 2))
+                                            assert np.isclose(numerical_norm, analytical_norm)
 
 
-
-
-
-
-
-
-
-
-def check_sympy_jacobi_polynomial():
-
-    from sympy.functions.special.polynomials import jacobi, jacobi_normalized
-    from sympy.abc import j, a, b, x
-    # jfun = jacobi_normalized(j, a, b, x)
-    jfun = jacobi_normalized(j, a, b, x)
-    # eval_jacobi = lambda q, r, p, o: float(jfun.eval(int(q), int(r), int(p), float(o)))
-    # eval_jacobi = lambda q, r, p, o: float(N(jfun, int(q), int(r), int(p), float(o)))
-    eval_jacobi = lambda jj, aa, bb, xx: float(jfun.subs({j: int(jj), a: int(aa), b: int(bb), x: float(xx)}))
-
-
-    f = lambda xx: eval_jacobi(2, 1, 1, xx) * eval_jacobi(2, 1, 1, xx) * (1-xx) ** 1 * (1+xx) ** 1
-    from scipy.integrate import quad
-    val = quad(f, a=-1, b=1)[0]
-    print(val)
-
-
-def myquad(f, a, b):
-    n = 10000
-    v = 0.
-    for x in np.linspace(a, b, num=n, endpoint=False):
-        v += f(x)
-    return v * (b - a) / n
-
-
-def check_normalization_wigner_d():
+def check_normalization_complex_wigner_d():
     """
     According to [1], the following is true (eq. 12)
-    int_0^pi d^l_mn(beta) d^l'_m'n'(beta) sin(beta) dbeta = 1 / (2 l + 1) delta(l,l')
+    int_0^pi |d^l_mn(beta)|^2 sin(beta) dbeta = 1 / (2 l + 1)
+
+    NOTE: this function only tests the Wigner-d functions in the *complex basis*.
+    In this basis, the Wigner-d functions all have the same, simple norm: 2. / (2l + 1)
+    In the real basis, some functions are identically 0 and for the rest the norm is hard to understand.
+    We treat these in a separate function below.
 
     [1] SOFT: SO(3) Fourier Transforms
     Peter J. Kostelec and Daniel N. Rockmore
-    :return:
     """
-    # Note: this function is called "check" not "test" because this function is expensive to evaluate and we don't
-    # want to automatically call this when running nosetests.
-
-    # The squared L2 norm for each of the normalizations
-    # By L2 norm of f we mean int_SO(3) |f(g)|^2 dg, where dg is the normalized Haar measure
-    L2_norm = {
-        'quantum': lambda l: 1. / (2 * l + 1),
-        'seismology': lambda l: 1. / (2 * l + 1),
-        'geodesy': lambda l: (16 * np.pi ** 2) / (2 * l + 1),
-        'nfft': lambda l: (16 * np.pi ** 2) / ((2 * l + 1) ** 3)
-    }
-    L2_norm = {
-        'quantum': lambda l: 2. / (2 * l + 1),
-        'seismology': lambda l: 2. / (2 * l + 1),
-        'geodesy': lambda l: 2. / (2 * l + 1),
-        'nfft': lambda l: 2. / (2 * l + 1)
-    }
-
+    # The squared L2 norm
+    # By squared L2 norm of f we mean |f|^2 = int_SO(3) |f(g)|^2 dg, where dg is the normalized Haar measure
+    L2_norm = lambda l: 2. / (2 * l + 1)
 
     for l in range(TEST_L_MAX):
         for m in range(-l, l + 1):
             for n in range(-l, l + 1):
-                for field in ('real', 'complex'):
+                for field in ('complex',):  # Only test complex d functions here
                     for normalization in ('quantum', 'seismology', 'geodesy', 'nfft'):
-                        for order in ('centered', 'block'):
-                            for condon_shortley in ('cs', 'nocs'):
+                        for condon_shortley in ('cs', 'nocs'):
+                            for order in ('centered', 'block'):
 
                                 f = lambda b: wigner_d_matrix(
                                     l=l, beta=b,
                                     field=field, normalization=normalization,
-                                    order=order, condon_shortley=condon_shortley)[m, n] ** 2 * np.sin(b)
+                                    order=order, condon_shortley=condon_shortley)[l + m, l + n] ** 2 * np.sin(b)
 
                                 # from scipy.integrate import quad
                                 # res = quad(f, a=0, b=np.pi, full_output=1)
@@ -202,14 +168,148 @@ def check_normalization_wigner_d():
                                 # if not np.isclose(val, L2_norm[normalization](l)):
                                 #     print(res)
                                 val = myquad(f, 0, np.pi)
-                                print(l, m, n, field, normalization, order, condon_shortley, val, L2_norm[normalization](l))
-                                # assert np.isclose(val, L2_norm[normalization](l))
+
+                                print(l, m, n, field, normalization, order, condon_shortley,
+                                      np.round(val, 2),
+                                      np.round(L2_norm(l), 2))
+                                assert np.isclose(val, L2_norm(l))
 
 
-def check_normalization_naive_wigner_d():
+def check_orthogonality_complex_wigner_d():
     """
     According to [1], the following is true (eq. 12)
-    int_0^pi d^l_mn(beta) d^l'_m'n'(beta) sin(beta) dbeta = 1 / (2 l + 1) delta(l,l')
+    int_0^pi d^l_mn(beta) d^l'_mn(beta) sin(beta) dbeta = 1 / (2 l + 1) delta(l,l')
+
+    NOTE: this function only tests the Wigner-d functions in the *complex basis*.
+    In this basis, the Wigner-d functions all have the same, simple norm: 2. / (2l + 1)
+    In the real basis, some functions are identically 0 and for the rest the norm is hard to understand.
+    We treat these in a separate function below.
+
+    NOTE: we only test in centered, not the block basis. For some reason this equality fails in the block basis.
+    I have not investigated the reason for this yet.
+
+    [1] SOFT: SO(3) Fourier Transforms
+    Peter J. Kostelec and Daniel N. Rockmore
+    :return:
+    """
+    # The squared L2 norm for each of the normalizations
+    # By squared L2 norm of f we mean |f|^2 = int_SO(3) |f(g)|^2 dg, where dg is the normalized Haar measure
+    L2_norm = lambda l: 2. / (2 * l + 1)
+
+    for field in ('complex',):
+        for normalization in ('quantum', 'seismology', 'geodesy', 'nfft'):
+            for condon_shortley in ('cs', 'nocs'):
+                for order in ('centered',):  # 'block'):
+                    for m in range(-TEST_L_MAX, TEST_L_MAX + 1):
+                        for n in range(-TEST_L_MAX, TEST_L_MAX + 1):
+                            for l in range(np.maximum(np.abs(m), np.abs(n)), TEST_L_MAX):
+                                for l2 in range(np.maximum(np.abs(m), np.abs(n)), TEST_L_MAX):
+
+                                    f = lambda b:\
+                                        wigner_d_function(
+                                            l=l, m=m, n=n, beta=b,
+                                            field=field, normalization=normalization,
+                                            order=order, condon_shortley=condon_shortley) * \
+                                        wigner_d_function(
+                                            l= l2, m=m, n=n, beta=b,
+                                            field=field, normalization=normalization,
+                                            order=order, condon_shortley=condon_shortley) * \
+                                        np.sin(b)
+
+                                    """f = lambda b:\
+                                        wigner_d_matrix(
+                                            l=l, beta=b,
+                                            field=field, normalization=normalization,
+                                            order=order, condon_shortley=condon_shortley)[l + m, l + n] * \
+                                        wigner_d_matrix(
+                                            l=l2, beta=b,
+                                            field=field, normalization=normalization,
+                                            order=order, condon_shortley=condon_shortley)[l2 + m, l2 + n] * \
+                                                  np.sin(b)
+                                    """
+
+                                    # from scipy.integrate import quad
+                                    # res = quad(f, a=0, b=np.pi, full_output=1)
+                                    # val = res[0]
+                                    # if not np.isclose(val, L2_norm[normalization](l)):
+                                    #     print(res)
+                                    numerical_inner_product = myquad(f, 0, np.pi)
+                                    analytical_inner_product = L2_norm(l) * (l == l2)
+
+                                    print(l, l2, m, n, field, normalization, order, condon_shortley,
+                                          np.round(numerical_inner_product, 2),
+                                          np.round(analytical_inner_product, 2))
+                                    assert np.isclose(numerical_inner_product, analytical_inner_product,
+                                                      rtol=1e-4, atol=1e-5)
+
+
+def check_orthogonality_naive_wigner_d():
+    """
+    According to [1], the following is true (eq. 12)
+    int_0^pi d^l_mn(beta) d^l'_mn(beta) sin(beta) dbeta = 1 / (2 l + 1) delta(l, l')
+
+    Here we check this equality numerically for the *naive* implementations of the Wigner-d functions
+
+    [1] SOFT: SO(3) Fourier Transforms
+    Peter J. Kostelec and Daniel N. Rockmore
+    :return:
+    """
+
+    # The squared L2 norm for each of the normalizations
+    # By squared L2 norm of f we mean |f|^2 = int_SO(3) |f(g)|^2 dg, where dg is the normalized Haar measure
+    L2_norm = lambda l: 2. / (2 * l + 1)
+
+    for m in range(-TEST_L_MAX, TEST_L_MAX + 1):
+        for n in range(-TEST_L_MAX, TEST_L_MAX + 1):
+            for l in range(np.maximum(np.abs(m), np.abs(n)), TEST_L_MAX):
+                for l2 in range(np.maximum(np.abs(m), np.abs(n)), TEST_L_MAX):
+
+                    f1 = lambda b: \
+                        wigner_d_naive(l=l, m=m, n=n, beta=b) * \
+                        wigner_d_naive(l=l2, m=m, n=n, beta=b) * \
+                        np.sin(b)
+
+                    f2 = lambda b: \
+                        wigner_d_naive_v2(l=l, m=m, n=n, beta=b) * \
+                        wigner_d_naive_v2(l=l2, m=m, n=n, beta=b) * \
+                        np.sin(b)
+
+                    f3 = lambda b: \
+                        wigner_d_naive_v3(l=l, m=m, n=n)(b) * \
+                        wigner_d_naive_v3(l=l2, m=m, n=n)(b) * \
+                        np.sin(b)
+
+                    for f in (f1, f2, f3):
+
+                        # from scipy.integrate import quad
+                        # res = quad(f, a=0, b=np.pi, full_output=1)
+                        # val = res[0]
+                        # if not np.isclose(val, L2_norm[normalization](l)):
+                        #     print(res)
+                        numerical_inner_product = myquad(f, 0, np.pi)
+                        analytical_inner_product = L2_norm(l) * (l == l2)
+
+                        print(l, l2, m, n,
+                              np.round(numerical_inner_product, 2),
+                              np.round(analytical_inner_product, 2))
+                        assert np.isclose(numerical_inner_product, analytical_inner_product,
+                                          rtol=1e-4, atol=1e-5)
+
+
+def myquad(f, a, b):
+
+    n = 1000
+    v = 0.
+    for x in np.linspace(a, b, num=n, endpoint=False):
+        v += f(x)
+    return v * (b - a) / n
+
+
+# TODO: this test is failing - I'm not sure what the norms for real Wigner-d functions should be (see comments below)
+def check_normalization_wigner_d_real(L_max=TEST_L_MAX):
+    """
+    According to [1], the following is true (eq. 12)
+    int_0^pi d^l_mn(beta) d^l'_mn(beta) sin(beta) dbeta = 1 / (2 l + 1) delta(l, l')
 
     [1] SOFT: SO(3) Fourier Transforms
     Peter J. Kostelec and Daniel N. Rockmore
@@ -221,97 +321,56 @@ def check_normalization_naive_wigner_d():
     # The squared L2 norm for each of the normalizations
     # By L2 norm of f we mean int_SO(3) |f(g)|^2 dg, where dg is the normalized Haar measure
     L2_norm = {
-        'quantum': lambda l: 1. / (2 * l + 1),
-        'seismology': lambda l: 1. / (2 * l + 1),
-        'geodesy': lambda l: (16 * np.pi ** 2) / (2 * l + 1),
-        'nfft': lambda l: (16 * np.pi ** 2) / ((2 * l + 1) ** 3)
+        'quantum': lambda l: 2. / (2 * l + 1),
+        'seismology': lambda l: 2. / (2 * l + 1),
+        'geodesy': lambda l: 2. / (2 * l + 1),
+        'nfft': lambda l: 2. / (2 * l + 1)
     }
+    correct = [np.zeros((2 * l + 1, 2 * l + 1)) for l in range(L_max)]
+    ratio = [np.zeros((2 * l + 1, 2 * l + 1)) for l in range(L_max)]
+    vals = [np.zeros((2 * l + 1, 2 * l + 1)) for l in range(L_max)]
 
-    for l in range(TEST_L_MAX):
-        for m in range(-l, l + 1):
-            for n in range(-l, l + 1):
-                for l2 in range(TEST_L_MAX):
-                    for m2 in range(-l2, l2 + 1):
-                        for n2 in range(-l2, l2 + 1):
-                                #f = lambda b: naive_wigner_d_v2(l=l, m=m, n=n, beta=b)\
-                                #              * naive_wigner_d_v2(l=l2, m=m2, n=n2, beta=b) * np.sin(b)
-                                f = lambda b: naive_wigner_d_v3(l=l, m=m, n=n)(b) \
-                                              * naive_wigner_d_v3(l=l2, m=m2, n=n2)(b) * np.sin(b)
+    # Note: this seems to be correct for complex wigners in all normalizations, orders, cs, l, m, n,
+    # For the real ones, we can understand which wigners are identically zero,
+    # the norms for the non-zeros appear to be pretty complicated. Plotting the norms for l=9, we see a band pattern
+    # similar to the appearance of the wigner-d matrix itself.
+    # This matrix is symmetric, so the norm for dmn equals the norm for dnm
+
+    # See note above in check_normalization_wigner_d_complex
+    # The norm of the real wigner-d functions seems to be hard to understand. The norm now depends on m,n as well as l
+    # We can understand which real wigners are identically zero (see real_zeros below, or plot a d-matrix).
+    # Plotting the norms for l=9, we see a moire-like pattern for the non-zero wigners,
+    # similar in appearance to the wigner-d matrix itself.
+    # This matrix is symmetric, so the norm for dmn equals the norm for dnm
+    for order in ('centered',):  # 'block'):
+        for l in range(L_max):
+            for m in range(-l, l + 1):
+                for n in range(-l, l + 1):
+                    for field in ('real',):  # only test real here
+                        for normalization in ('quantum',):  # 'seismology', 'geodesy', 'nfft'): all normalization seem to give the same behaviour
+                            for condon_shortley in ('cs',):  # 'nocs'): doesn't seem to matter
+
+                                f = lambda b: wigner_d_matrix(
+                                    l=l, beta=b,
+                                    field=field, normalization=normalization,
+                                    order=order, condon_shortley=condon_shortley)[l + m, l + n] ** 2 * np.sin(b)
+
                                 # from scipy.integrate import quad
-                                # val = quad(f, a=0, b=np.pi)[0]
+                                # res = quad(f, a=0, b=np.pi, full_output=1)
+                                # val = res[0]
+                                # if not np.isclose(val, L2_norm[normalization](l)):
+                                #     print(res)
                                 val = myquad(f, 0, np.pi)
 
-                                print(l, m, n, l2, m2, n2, val, 2 / (2 * l + 1) * (l == l2))
+                                real_zeros = ((m < 0 and n >= 0) or (m >= 0 and n < 0)) and field == 'real'
+                                print(l, m, n, # field, normalization, order, condon_shortley,
+                                      np.round(val, 2),
+                                      np.round(L2_norm[normalization](l) * (not real_zeros), 2))
                                 # assert np.isclose(val, L2_norm[normalization](l))
+                                # if not np.isclose(val, L2_norm[normalization](l)):
+                                #     print("!!!!!")
+                                correct[l][l + m, l + n] = np.isclose(val, L2_norm[normalization](l) * (not real_zeros))
+                                ratio[l][l + m, l + n] = val / (L2_norm[normalization](l) * (not real_zeros)) if (not real_zeros) else 1
+                                vals[l][l + m, l + n] = val
 
-
-def make_wigfun(field, normalization, order, cs):
-    return lambda l, m, n, b: wigner_d_matrix(l, b, field, normalization, order, cs)[m, n]
-
-def check_orthogonality_wigner_d(wigfun):
-    for l in range(TEST_L_MAX):
-        for m in range(-l, l + 1):
-            for n in range(-l, l + 1):
-                for l2 in range(TEST_L_MAX):
-                    for m2 in range(-l2, l2 + 1):
-                        for n2 in range(-l2, l2 + 1):
-                            def f(b):
-                                w1 = wigfun(l, m, n, b)
-                                w2 = wigfun(l2, m2, n2, b)
-                                return w1 * w2 * np.sin(b)
-
-                            from scipy.integrate import quad
-                            val = quad(f, a=0, b=np.pi)[0]
-                            print(l, m, n, l2, m2, n2, np.round(val, 3), int(l == l2))
-                            # assert np.isclose(val, L2_norm[normalization](l))
-
-
-def check_orthogonality_wigner_d_all():
-    """
-    According to [1], the following is true (eq. 12)
-    int_0^pi d^l_mn(beta) d^l'_m'n'(beta) sin(beta) dbeta = 1 / (2 l + 1) delta(l,l')
-
-    [1] SOFT: SO(3) Fourier Transforms
-    Peter J. Kostelec and Daniel N. Rockmore
-    :return:
-    """
-    # Note: this function is called "check" not "test" because this function is expensive to evaluate and we don't
-    # want to automatically call this when running nosetests.
-
-    # The squared L2 norm for each of the normalizations
-    # By L2 norm of f we mean int_SO(3) |f(g)|^2 dg, where dg is the normalized Haar measure
-    L2_norm = {
-        'quantum': lambda l: 1. / (2 * l + 1),
-        'seismology': lambda l: 1. / (2 * l + 1),
-        'geodesy': lambda l: (16 * np.pi ** 2) / (2 * l + 1),
-        'nfft': lambda l: (16 * np.pi ** 2) / ((2 * l + 1) ** 3)
-    }
-
-    for field in ('real', 'complex'):
-        for normalization in ('quantum', 'seismology', 'geodesy', 'nfft'):
-            for order in ('centered', 'block'):
-                for condon_shortley in ('cs', 'nocs'):
-                    for l in range(TEST_L_MAX):
-                        for m in range(-l, l + 1):
-                            for n in range(-l, l + 1):
-                                for l2 in range(TEST_L_MAX):
-                                    for m2 in range(-l2, l2 + 1):
-                                        for n2 in range(-l2, l2 + 1):
-
-                                            def f(b):
-                                                w1 = wigner_d_matrix(
-                                                    l=l, beta=b,
-                                                    field=field, normalization=normalization,
-                                                    order=order, condon_shortley=condon_shortley)[m, n]
-                                                w2 = wigner_d_matrix(
-                                                    l=l2, beta=b,
-                                                    field=field, normalization=normalization,
-                                                    order=order, condon_shortley=condon_shortley)[m2, n2]
-                                                return w1 * w2 * np.sin(b)
-
-                                            from scipy.integrate import quad
-                                            val = quad(f, a=0, b=np.pi)[0]
-                                            print(field, normalization, order, condon_shortley, l, m, n, l2, m2, n2,
-                                                  np.round(val, 2), L2_norm[normalization](l) * (l == l2))
-                                            # assert np.isclose(val, L2_norm[normalization](l))
-
+    return correct, ratio, vals
