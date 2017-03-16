@@ -18,14 +18,14 @@ def test_SO3_FFT_Synthesis_NaiveComplex():
             for n in range(-l, l + 1):
                 f_hat[l][l + m, l + n] = 1.
                 D = fft.synthesize(f_hat)
-                f_hat[l][l + m, l + n] = 0.
+
                 D2 = make_D_sample_grid(b=L_max + 1, l=l, m=m, n=n,
-                                        field='complex', normalization='seismology',
+                                        field='complex', normalization='quantum',
                                         order='centered', condon_shortley='cs')
 
                 diff = np.sum(np.abs(D - D2))
                 print(l, m, n, diff)
-                # assert np.isclose(diff, 0.0)
+                assert np.isclose(diff, 0.0)
 
                 f_hat_2 = fft.analyze(D2)
                 # for ff in f_hat_2:
@@ -33,18 +33,13 @@ def test_SO3_FFT_Synthesis_NaiveComplex():
                 f_hat_flat = np.hstack([ff.flatten() for ff in f_hat])
                 f_hat_2_flat = np.hstack([ff.flatten() for ff in f_hat_2])
 
-                #print(f_hat_flat)
-                #print(f_hat_2_flat)
-                #print('f_hat shapes', [ff.shape for ff in f_hat])
-                #print('f_hat_2 shapes', [ff.shape for ff in f_hat_2])
-                #print('f_hat_flat shape', f_hat_flat.shape)
-                #print('f_hat_2_flat shape', f_hat_2_flat.shape)
-                #print('D shape', D.shape)
-                #print('D2 shape', D2.shape)
+                f_hat_2_flat *= (2 * l + 1) / (4 * np.pi)  # apply magic constant
 
                 diff = np.sum(np.abs(f_hat_flat - f_hat_2_flat))
-                print(l, m, n, diff, np.max(np.abs(f_hat_2_flat)))
-                # assert np.isclose(diff, 0.0)
+                print(l, m, n, diff)
+                assert np.isclose(diff, 0.0)
+
+                f_hat[l][l + m, l + n] = 0.
 
 
 def test_SO3_FFT_Analysis_NaiveComplex():
