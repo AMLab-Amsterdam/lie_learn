@@ -56,23 +56,27 @@ def meshgrid(b, convention='Driscoll-Healy'):
     Create a coordinate grid for the 2-sphere.
     There are various ways to setup a grid on the sphere.
 
-    if convention == 'Driscoll-Heally', we follow the convention from [4], which is also used in [5].
-    The Driscoll-Healy convention is:
-    theta_j = pi j / (2 b)
-    phi_k = pi k / b
-    where j, k in {0, ..., 2 b - 1}
+    if convention == 'Driscoll-Healy', we follow the convention from [4], which is also used in [5]:
+    theta_j = pi j / (2 b)     for j = 0, ..., 2b - 1
+    phi_k = pi k / b           for k = 0, ..., 2b - 1
 
-    if convention == 'SOFT', we follow the convention from [1]
-    The SOFT convention is:
-    theta_j = pi (2 j + 1) / (4 b)
-    phi_k = pi  k / b
-    (in the SOFT documentation, substitute theta = beta, phi = alpha)
+    if convention == 'SOFT', we follow the convention from [1] and [6]
+    theta_j = pi (2 j + 1) / (4 b)   for j = 0, ..., 2b - 1
+    phi_k = pi k / b                for k = 0, ..., 2b - 1
 
-    if convention == 'Clenshaw-Curtis', we use the Clenshaw-Curtis grid, as defined in [2].
+    if convention == 'Clenshaw-Curtis', we use the Clenshaw-Curtis grid, as defined in [2] (section 6):
+    theta_j = j pi / (2b)     for j = 0, ..., 2b
+    phi_k = k pi / (b + 1)    for k = 0, ..., 2b + 1
 
-    if convention == 'Gauss-Legendre', we use the Gauss-Legendre grid, as defined in [2].
+    if convention == 'Gauss-Legendre', we use the Gauss-Legendre grid, as defined in [2] (section 6) and [7] (eq. 2):
+    theta_j = the Gauss-Legendre nodes    for j = 0, ..., b
+    phi_k = k pi / (b + 1),               for k = 0, ..., 2 b + 1
 
-    if convention == 'HEALPix', we use the HEALPix grid.
+    if convention == 'HEALPix', we use the HEALPix grid, see [2] (section 6):
+    TODO
+
+    if convention == 'equidistribution', we use the equidistribution grid, as defined in [2] (section 6):
+    TODO
 
     [1] SOFT: SO(3) Fourier Transforms
     Kostelec, Peter J & Rockmore, Daniel N.
@@ -89,8 +93,14 @@ def meshgrid(b, convention='Driscoll-Healy'):
     [5] Engineering Applications of Noncommutative Harmonic Analysis
     Chrikjian, G.S. & Kyatkin, A.B.
 
-    :param b:
-    :return:
+    [6] FFTs for the 2-Sphere – Improvements and Variations
+    Healy, D., Rockmore, D., Kostelec, P., Moore, S
+
+    [7] A Fast Algorithm for Spherical Grid Rotations and its Application to Singular Quadrature
+    Zydrunas Gimbutas, Shravan Veerapaneni
+
+    :param b: the bandwidth / resolution
+    :return: a meshgrid on S^2
     """
     return np.meshgrid(*linspace(b, convention))
 
@@ -109,10 +119,7 @@ def linspace(b, convention='Driscoll-Healy'):
         theta = np.linspace(0, np.pi, 2 * b + 1)
         phi = np.linspace(0, 2 * np.pi, 2 * b + 2, endpoint=False)
     elif convention == 'Gauss-Legendre':
-        # For details, see:
-        # "A Fast Algorithm for Spherical Grid Rotations and its Application to Singular Quadrature"
-        # Zydrunas Gimbutas, Shravan Veerapaneni
-        x, _ = leggauss(b + 1)
+        x, _ = leggauss(b + 1)  # TODO: leggauss docs state that this may not be only stable for orders > 100
         theta = np.arccos(x)
         phi = np.arange(2 * b + 2) * np.pi / (b + 1)
     elif convention == 'HEALPix':
@@ -166,9 +173,7 @@ def quadrature_weights(b, convention='Gauss-Legendre'):
         _, w = leggauss(b + 1)
         W = w[None, :] * (2 * np.pi / (2 * b + 2) * np.ones(2 * b + 2)[:, None])
     elif convention == 'SOFT':
-
         print("WARNING: SOFT quadrature weights don't work yet")
-
         k = np.arange(0, b)
         w = np.array([(2. / b) * np.sin(np.pi * (2. * j + 1.) / (4. * b)) *
                       (np.sum((1. / (2 * k + 1))
@@ -190,7 +195,7 @@ def integrate(f, normalize=True):
     int_S^2 f(x) dmu(x) = int_0^2pi int_0^pi f(theta, phi) sin(theta) dtheta dphi
 
     :param f: a function of two scalar variables returning a scalar.
-    :return:
+    :return: the integral of f over the 2-sphere
     """
     from scipy.integrate import quad
 
@@ -255,6 +260,8 @@ def _clenshaw_curtis_weights(n):
     :return:
     """
     from scipy.fftpack import ifft, fft, fftshift
+
+    # TODO python3 handles division differently from python2. Check how MATLAB interprets /, and if this code is still correct for python3
 
     # function [wf1,wf2,wcc] = fejer(n)
     # Weights of the Fejer2, Clenshaw-Curtis and Fejer1 quadratures by DFTs

@@ -32,9 +32,9 @@ def block_sh_ph(L_max, theta, phi):
     irreps = np.arange(L_max + 1)
 
     ls = [[ls] * (2 * ls + 1) for ls in irreps]
-    ls = np.array([ll for sublist in ls for ll in sublist])  # 1, 1, 1, 2, 2, 2, 2, 2, ...
+    ls = np.array([ll for sublist in ls for ll in sublist])  # 0, 1, 1, 1, 2, 2, 2, 2, 2, ...
     ms = [list(range(-ls, ls + 1)) for ls in irreps]
-    ms = np.array([mm for sublist in ms for mm in sublist])  # -1, 0, 1, -2, -1, 0, 1, 2, ...
+    ms = np.array([mm for sublist in ms for mm in sublist])  # 0, -1, 0, 1, -2, -1, 0, 1, 2, ...
 
     # Get a vector Y that selects the 0-frequency component from each irrep in the centered basis
     # If D is a Wigner D matrix, then D Y is the center column of D, which is equal to the spherical harmonics.
@@ -62,9 +62,7 @@ def block_sh_ph(L_max, theta, phi):
     TYb = apply_rotation_block(g=g, X=Yb[np.newaxis, :],
                                irreps=irreps, c2b=c2b,
                                J_block=J_block, l_max=np.max(irreps))
-    #print Y
-    #print Yb
-    #print TYb
+
     print(Yb.shape, TYb.shape)
 
     # Change back to centered basis
@@ -173,6 +171,7 @@ def csh(l, m, theta, phi, normalization='quantum', condon_shortley=True):
     dOmega = sin(theta) dtheta dphi
     The 'geodesy' convention have unit power, meaning the norm is equal to the surface area of the unit sphere (4 pi)
     <Y_l^m, Y_l'^m'> = 4pi delta(l, l') delta(m, m')
+    So these are orthonormal with respect to the *normalized* Haar measure sin(theta) dtheta dphi / 4pi
 
     On each of these normalizations, one can optionally include a Condon-Shortley phase factor:
     (-1)^m   (if m > 0)

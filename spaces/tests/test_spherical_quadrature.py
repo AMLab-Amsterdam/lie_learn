@@ -49,4 +49,4 @@ def test_spherical_quadrature():
     print(i1_soft_w, i1, 'diff:', np.abs(i1_soft_w - i1))
     print(i1_soft_w)
     print(i1)
-    # assert np.isclose(np.abs(i1_cc_w - i1), 0.0)
+    # assert np.isclose(np.abs(i1_cc_w - i1), 0.0)  # TODO
