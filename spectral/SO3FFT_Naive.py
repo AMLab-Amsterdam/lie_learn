@@ -3,7 +3,7 @@ import numpy as np
 
 from lie_learn.representations.SO3.irrep_bases import change_of_basis_matrix
 from lie_learn.representations.SO3.pinchon_hoggan.pinchon_hoggan_dense import rot_mat, Jd
-from lie_learn.representations.SO3.wigner_d import wigner_d_matrix
+from lie_learn.representations.SO3.wigner_d import wigner_d_matrix, wigner_D_matrix
 import lie_learn.spaces.S3 as S3
 
 from .FFTBase import FFTBase
@@ -15,21 +15,77 @@ from scipy.fftpack import fft2, ifft2, fftshift
 # The real Wigner-d functions d^l_mn are identically 0 whenever either (m < 0 and n >= 0) or (m >= 0 and n < 0),
 #   so we can save work in the Wigner-d transform
 
-class SO3_FFT_NaiveComplex(FFTBase):
+class SO3_FT_Naive(FFTBase):
+    """
+    The most naive implementation of the discrete SO(3) Fourier transform:
+    explicitly construct the Fourier matrix F and multiply by it to perform the Fourier transform.
+    """
 
-    def __init__(self, L_max, d=None, w=None, L2_normalized=True):
-        """
+    def __init__(self, L_max, field='complex', normalization='quantum', order='centered', condon_shortley='cs'):
 
-        :param L_max:
-        :param d:
-        :param w:
-        :param L2_normalized:
-        """
+        super().__init__()
+
+        # Explicitly construct the Wigner-D matrices evaluated at each point in a grid in SO(3)
+        self.D = []
+        b = L_max + 1
+        for l in range(b):
+            self.D.append(np.zeros((2 * b, 2 * b, 2 * b, 2 * l + 1, 2 * l + 1),
+                                   dtype=complex if field == 'complex' else float))
+
+            for j1 in range(2 * b):
+                alpha = 2 * np.pi * j1 / (2. * b)
+                for k in range(2 * b):
+                    beta = np.pi * (2 * k + 1) / (4. * b)
+                    for j2 in range(2 * b):
+                        gamma = 2 * np.pi * j2 / (2. * b)
+                        self.D[-1][j1, k, j2, :, :] = wigner_D_matrix(l, alpha, beta, gamma,
+                                                                      field, normalization, order, condon_shortley)
+
+        # Compute quadrature weights
+        self.w = S3.quadrature_weights(b=b)
+
+        # Convert D to a matrix that performs the FFT synthesis
+        # The first axis corresponds to the spatial samples.
+        # The spatial grid has shape (2b, 2b, 2b), so this axis has length (2b)^3
+        # The second axis of this matrix has length sum_{l=0}^L_max (2l+1)^2,
+        # which corresponds to all the spectral coefficients flattened into a vector.
+        # (normally these are stored as matrices D^l of shape (2l+1)x(2l+1))
+        self.F = np.hstack([self.D[l].reshape((2 * b) ** 3, (2 * l + 1) ** 2) for l in range(b)])
+
+    def analyze(self, f):
+        f_hat = []
+        for l in range(f.shape[0] // 2):
+            f_hat.append(np.einsum('ijkmn,ijk->mn', self.D[l], f * self.w[None, :, None]))
+        return f_hat
+
+    def analyze_by_matmul(self, f):
+        f = f * self.w[None, :, None]
+        f = f.flatten()
+        return self.F.T.conj().dot(f)
+
+    def synthesize(self, f_hat):
+        b = len(self.D)
+        f = np.zeros((2 * b, 2 * b, 2 * b), dtype=self.D[0].dtype)
+        for l in range(b):
+            f += np.einsum('ijkmn,mn->ijk', self.D[l], f_hat[l])
+        return f
+
+    def synthesize_by_matmul(self, f_hat):
+        return self.F.dot(f_hat)
+
+
+class SO3_FFT_SemiNaive_Complex(FFTBase):
+
+    def __init__(self, L_max, d=None, w=None, L2_normalized=True,
+                 field='complex', normalization='quantum', order='centered', condon_shortley='cs'):
 
         super().__init__()
 
         if d is None:
-            self.d = setup_d_transform(b=L_max + 1, L2_normalized=L2_normalized)
+            self.d = setup_d_transform(
+                b=L_max + 1, L2_normalized=L2_normalized,
+                field=field, normalization=normalization,
+                order=order, condon_shortley=condon_shortley)
         else:
             self.d = d
 
@@ -41,57 +97,7 @@ class SO3_FFT_NaiveComplex(FFTBase):
         self.wd = weigh_wigner_d(self.d, self.w)
 
     def analyze(self, f):
-        """
-        Compute the complex SO(3) Fourier transform of f.
-
-        The standard way to define the FT is:
-        \hat{f}^l_mn = (2 J + 1)/(8 pi^2) *
-           int_0^2pi da int_0^pi db sin(b) int_0^2pi dc f(a,b,c) D^{l*}_mn(a,b,c)
-
-        The normalizing constant comes about because:
-        int_SO(3) D^*(g) D(g) dg = 8 pi^2 / (2 J + 1)
-        where D is any Wigner D function D^l_mn. Note that the factor 8 pi^2 (the volume of SO(3))
-        goes away if we integrate with the normalized Haar measure.
-
-        This function computes the FT using the normalized D functions:
-        \tilde{D} = 1/2pi sqrt((2J+1)/2) D
-        where D are the rotation matrices in the basis of complex, seismology-normalized, centered spherical harmonics.
-
-        Hence, this function computes:
-        \hat{f}^l_mn = \int_SO(3) f(g) \tilde{D}^{l*}_mn(g) dg
-
-        So that the FT of f = \tilde{D}^l_mn is 1 at (l,m,n) (and zero elsewhere).
-
-        Args:
-          f: an array of shape (2B, 2B, 2B), where B is the bandwidth.
-
-        Returns:
-          f_hat: the Fourier transform of f. A list of length B,
-          where entry l contains an 2l+1 by 2l+1 array containing the projections
-          of f onto matrix elements of the l-th irreducible representation of SO(3).
-
-        Main source:
-        SOFT: SO(3) Fourier Transforms
-        Peter J. Kostelec and Daniel N. Rockmore
-
-        Further information:
-        Generalized FFTs-a survey of some recent results
-        Maslen & Rockmore
-
-        Engineering Applications of Noncommutative Harmonic Analysis.
-        9.5 - Sampling and FFT for SO(3) and SU(2)
-        G.S. Chrikjian, A.B. Kyatkin
-        """
-        assert f.shape[0] == f.shape[1]
-        assert f.shape[1] == f.shape[2]
-        assert f.shape[0] % 2 == 0
-
-        # First, FFT along the alpha and gamma axes (axis 0 and 2, respectively)
-        F = fft2(f, axes=(0, 2))
-        F = fftshift(F, axes=(0, 2))
-
-        # Then, perform the Wigner-d transform
-        return wigner_d_transform_analysis(F, self.wd)
+        return SO3_FFT_analyze(f, self.wd)
 
     def synthesize(self, f_hat):
         """
@@ -99,13 +105,7 @@ class SO3_FFT_NaiveComplex(FFTBase):
 
         :param f_hat: a list of matrices of with shapes [1x1, 3x3, 5x5, ..., 2 L_max + 1 x 2 L_max + 1]
         """
-        b = len(self.d)
-        F = wigner_d_transform_synthesis(f_hat, self.d)
-
-        # The rest of the SO(3) FFT is just a standard torus FFT
-        F = fftshift(F, axes=(0, 2))
-        f = ifft2(F, axes=(0, 2))
-        return f * (2 * b) ** 2
+        return SO3_FFT_synthesize(f_hat, self.d)
 
 
 class SO3_FFT_NaiveReal(FFTBase):
@@ -113,7 +113,7 @@ class SO3_FFT_NaiveReal(FFTBase):
     def __init__(self, L_max, d=None, L2_normalized=True):
 
         self.L_max = L_max
-        self.complex_fft = SO3_FFT_NaiveComplex(L_max=L_max, d=d, L2_normalized=L2_normalized)
+        self.complex_fft = SO3_FFT_SemiNaive_Complex(L_max=L_max, d=d, L2_normalized=L2_normalized)
 
         # Compute change of basis function:
         self.c2b = [change_of_basis_matrix(l,
@@ -142,7 +142,7 @@ class SO3_FFT_NaiveReal(FFTBase):
         # Synthesize without using complex fft
 
 
-def SO3_fft(f, d=None, w=None):
+def SO3_FFT_analyze(f, wd):
     """
     Compute the complex SO(3) Fourier transform of f.
 
@@ -152,7 +152,8 @@ def SO3_fft(f, d=None, w=None):
 
     The normalizing constant comes about because:
     int_SO(3) D^*(g) D(g) dg = 8 pi^2 / (2 J + 1)
-    where D is any Wigner D function D^l_mn.
+    where D is any Wigner D function D^l_mn. Note that the factor 8 pi^2 (the volume of SO(3))
+    goes away if we integrate with the normalized Haar measure.
 
     This function computes the FT using the normalized D functions:
     \tilde{D} = 1/2pi sqrt((2J+1)/2) D
@@ -186,35 +187,28 @@ def SO3_fft(f, d=None, w=None):
     assert f.shape[0] == f.shape[1]
     assert f.shape[1] == f.shape[2]
     assert f.shape[0] % 2 == 0
-    b = f.shape[0] / 2
 
     # First, FFT along the alpha and gamma axes (axis 0 and 2, respectively)
-    # We use the inverse FFT (ifft) here, because the np.fft sign convention
-    # for alpha and gamma is reversed relative to our D functions.
-    # F = np.fft.ifft2(f.conj(), axes=(0, 2)).conj()
     F = fft2(f, axes=(0, 2))
     F = fftshift(F, axes=(0, 2))
-    f0 = F.shape[0] / 2  # The index of the 0-frequency / DC component
 
-    if d is None:
-        d = setup_d_transform(b, L2_normalized=True)  # not 100% sure L2_normalized should be True
+    # Then, perform the Wigner-d transform
+    return wigner_d_transform_analysis(F, wd)
 
-    if w is None:
-        w = S3.quadrature_weights(b)
+def SO3_FFT_synthesize(f_hat, d):
+    """
+    Perform the inverse (spectral to spatial) SO(3) Fourier transform.
 
-    d = [d[l] * w[None, :, None] for l in range(b)]
+    :param f_hat: a list of matrices of with shapes [1x1, 3x3, 5x5, ..., 2 L_max + 1 x 2 L_max + 1]
+    """
+    F = wigner_d_transform_synthesis(f_hat, d)
 
-    f_hat = []
-    Z = 2 * np.pi / ((2 * b) ** 2)  # Normalizing constant
-    for l in range(b):
-        # Dot the vectors F_mn and d_mn over the middle axis (beta),
-        # where -l <= m,n <= l, which corresponds to
-        # f0 - l <= m,n <= f0 + l + 1
-        # for 0-based indexing and zero-frequency location f0
-        f_hat.append(
-            np.sum(d[l] * F[f0 - l:f0 + l + 1, :, f0 - l:f0 + l + 1], axis=1) * Z
-        )
-    return f_hat
+    # The rest of the SO(3) FFT is just a standard torus FFT
+    F = fftshift(F, axes=(0, 2))
+    f = ifft2(F, axes=(0, 2))
+
+    b = len(d)
+    return f * (2 * b) ** 2
 
 
 def SO3_ifft(f_hat, d):
@@ -249,12 +243,11 @@ def wigner_d_transform_analysis(f, wd):
 
     In practice we want to transform many data vectors at once; we have an input array of shape (
 
-
     [1] SOFT: SO(3) Fourier Transforms
     Peter J. Kostelec and Daniel N. Rockmore
 
     :param F:
-    :param wd:
+    :param wd: the weighted Wigner-d functions, as returned by weigh_wigner_d()
     :return:
     """
     assert f.shape[0] == f.shape[1]
@@ -352,14 +345,16 @@ def setup_d_transform(b, L2_normalized,
 
 def weigh_wigner_d(d, w):
     """
+    The Wigner-d transform involves a sum where each term is a product of data, d-function, and quadrature weight.
+     Since the d-functions and quadrature weights don't depend on the data, we can precompute their product.
+    We have a quadrature weight for each value of beta and beta corresponds to the second axis of d,
+    so the weights are broadcast over the other axes.
 
-    :param d:
-    :param w:
-    :return:
+    :param d: a list of samples of the Wigner-d function, as returned by setup_d_transform
+    :param w: an array of quadrature weights, as returned by S3.quadrature_weights
+    :return: the weighted d function samples, with the same shape as d
     """
-    b = len(d)
-    d = [d[l] * w[None, :, None] for l in range(b)]
-    return d
+    return [d[l] * w[None, :, None] for l in range(len(d))]
 
 
 def SO3_convolve(f, g, dw=None, d=None):
@@ -388,7 +383,7 @@ def SO3_convolve_complex_fft(f, g):
     assert f.shape[0] % 2 == 0
     b = f.shape[0] / 2
 
-    fft = SO3_FFT_NaiveComplex(L_max=b - 1, d=None, w=None, L2_normalized=False)
+    fft = SO3_FFT_SemiNaive_Complex(L_max=b - 1, d=None, w=None, L2_normalized=False)
 
     f_hat = fft.analyze(f)
     g_hat = fft.analyze(g)
