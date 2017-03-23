@@ -38,8 +38,8 @@ class S2HarmonicDensity():
             convention = 'Clenshaw-Curtis'
             #convention = 'Gauss-Legendre'
 
-            x = S2.meshgrid(b=self.L_max_os, convention=convention)
-            w = S2.quadrature_weights(b=self.L_max_os, convention=convention)
+            x = S2.meshgrid(b=self.L_max_os, grid_type=convention)
+            w = S2.quadrature_weights(b=self.L_max_os, grid_type=convention)
             self.fft = S2FFT_NFFT(L_max=self.L_max_os, x=x, w=w)
         else:
             if fft.L_max < self.L_max_os:

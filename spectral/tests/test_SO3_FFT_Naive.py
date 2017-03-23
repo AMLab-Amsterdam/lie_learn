@@ -5,6 +5,10 @@ from lie_learn.representations.SO3.pinchon_hoggan.pinchon_hoggan_dense import Jd
 from lie_learn.representations.SO3.irrep_bases import change_of_basis_matrix
 
 
+# TODO: test if the Fourier transform of a right-invariant function is zero except for a column at n=0, and
+# test if it is equal to the spherical harmonics transform of the corresponding function on the sphere
+
+
 def test_SO3_FFT_SemiNaiveComplex():
     """
     Check that the naive complex SO(3) FFT:

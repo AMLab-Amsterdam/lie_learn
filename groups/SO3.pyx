@@ -66,10 +66,10 @@ def transform_r3(g, x, g_parameterization='MAT', x_parameterization='C'):
     Apply rotation g in SO(3) to points x in R^3.
     """
     g_mat = change_coordinates(g=g, p_from=g_parameterization, p_to='MAT', perform_checks=False)
-    x_vec = Rn.change_coordinates(x, p_from=x_parameterization, p_to='C')
+    x_vec = Rn.change_coordinates(x, n=3, p_from=x_parameterization, p_to='C')
     #gx_vec = g_mat.dot(x_vec)
     gx_vec = np.einsum('...ij,...j->...i', g_mat, x_vec)
-    return Rn.change_coordinates(gx_vec, p_from = 'C', p_to=x_parameterization)
+    return Rn.change_coordinates(gx_vec, n=3, p_from = 'C', p_to=x_parameterization)
 
 def change_coordinates(g, p_from, p_to, units='rad', perform_checks=False):
     """

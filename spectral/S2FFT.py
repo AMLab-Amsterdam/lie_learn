@@ -15,15 +15,15 @@ class S2_FT_Naive(FFTBase):
 
     def __init__(self, L_max,
                  grid_type='Gauss-Legendre',
-                 field='complex', normalization='quantum', condon_shortley='cs'):
+                 field='real', normalization='quantum', condon_shortley='cs'):
 
         super().__init__()
 
         self.b = L_max + 1
 
         # Compute a grid of spatial sampling points and associated quadrature weights
-        theta, phi = S2.meshgrid(b=self.b, convention=grid_type)
-        self.w = S2.quadrature_weights(b=self.b, convention=grid_type)
+        theta, phi = S2.meshgrid(b=self.b, grid_type=grid_type)
+        self.w = S2.quadrature_weights(b=self.b, grid_type=grid_type)
         self.spatial_grid_shape = theta.shape
         self.num_spatial_points = theta.size
 
@@ -72,7 +72,7 @@ def setup_legendre_transform(b):
     dim = np.sum(np.arange(b) * 2 + 1)
     lt = np.empty((dim, 2 * b))
 
-    theta, _ = S2.linspace(b, convention='Driscoll-Healy')
+    theta, _ = S2.linspace(b, grid_type='Driscoll-Healy')
     sample_points = np.cos(theta)
 
     # TODO move quadrature weight computation to S2.py

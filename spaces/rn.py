@@ -22,6 +22,8 @@ def change_coordinates(coords, n, p_from='C', p_to='S'):
     :return:
     """
 
+    coords = np.asarray(coords)
+
     if p_from == p_to:
         return coords
 

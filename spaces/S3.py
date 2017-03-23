@@ -63,11 +63,11 @@ def change_coordinates(coords, p_from='C', p_to='S'):
         raise ValueError('Unknown conversion:' + str(p_from) + ' to ' + str(p_to))
 
 
-def linspace(b, convention='SOFT'):
+def linspace(b, grid_type='SOFT'):
     """
     Compute a linspace on the 3-sphere.
 
-    Since S3 is ismorphic to SO(3), we use the grid convention from:
+    Since S3 is ismorphic to SO(3), we use the grid grid_type from:
     FFTs on the Rotation Group
     Peter J. Kostelec and Daniel N. Rockmore
     http://www.cs.dartmouth.edu/~geelong/soft/03-11-060.pdf
@@ -78,7 +78,7 @@ def linspace(b, convention='SOFT'):
     # beta = np.pi * (2 * np.arange(2 * b) + 1) / (4. * b)
     # gamma = 2 * np.pi * np.arange(2 * b) / (2. * b)
 
-    beta, alpha = S2.linspace(b, convention)
+    beta, alpha = S2.linspace(b, grid_type)
 
     # According to this paper:
     # "Sampling sets and quadrature formulae on the rotation group"
@@ -88,8 +88,8 @@ def linspace(b, convention='SOFT'):
     return alpha, beta, gamma
 
 
-def meshgrid(b):
-    return np.meshgrid(*linspace(b))
+def meshgrid(b, grid_type='SOFT'):
+    return np.meshgrid(*linspace(b, grid_type))
 
 
 def integrate(f, normalize=True):
@@ -123,7 +123,22 @@ def integrate(f, normalize=True):
         return integral
 
 
-def quadrature_weights(b):
+def integrate_quad(f, grid_type, normalize=True, w=None):
+
+    if grid_type == 'SOFT':
+        b = f.shape[0] // 2
+
+        if w is None:
+            w = quadrature_weights(b, grid_type)
+
+        print(f.shape, w.shape)
+        integral = np.sum(f * w[None, :, None])
+        return integral
+    else:
+        raise NotImplementedError('Unsupported grid_type:', grid_type)
+
+
+def quadrature_weights(b, grid_type='SOFT'):
     """
     Compute quadrature weights for the grid used by Kostelec & Rockmore [1, 2].
 
@@ -147,19 +162,22 @@ def quadrature_weights(b):
     :param b: bandwidth (grid has shape 2b * 2b * 2b)
     :return: w: an array of length 2b containing the quadrature weigths
     """
-    k = np.arange(0, b)
-    w = np.array([(2. / b) * np.sin(np.pi * (2. * j + 1.) / (4. * b)) *
-                  (np.sum((1. / (2 * k + 1))
-                          * np.sin((2 * j + 1) * (2 * k + 1)
-                                   * np.pi / (4. * b))))
-                  for j in range(2 * b)])
+    if grid_type == 'SOFT':
+        k = np.arange(0, b)
+        w = np.array([(2. / b) * np.sin(np.pi * (2. * j + 1.) / (4. * b)) *
+                      (np.sum((1. / (2 * k + 1))
+                              * np.sin((2 * j + 1) * (2 * k + 1)
+                                       * np.pi / (4. * b))))
+                      for j in range(2 * b)])
 
-    # In the SOFT source, they talk about the following weights being used for
-    # odd-order transforms. Do not understand this, and the weights used above
-    # (defined in the SOFT papers) seems to work.
-    # w = np.array([(2. / b) *
-    #              (np.sum((1. / (2 * k + 1))
-    #                      * np.sin((2 * j + 1) * (2 * k + 1)
-    #                               * np.pi / (4. * b))))
-    #              for j in range(2 * b)])
-    return w
+        # In the SOFT source, they talk about the following weights being used for
+        # odd-order transforms. Do not understand this, and the weights used above
+        # (defined in the SOFT papers) seems to work.
+        # w = np.array([(2. / b) *
+        #              (np.sum((1. / (2 * k + 1))
+        #                      * np.sin((2 * j + 1) * (2 * k + 1)
+        #                               * np.pi / (4. * b))))
+        #              for j in range(2 * b)])
+        return w
+    else:
+        raise NotImplementedError

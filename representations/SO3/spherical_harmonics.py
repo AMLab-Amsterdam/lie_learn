@@ -13,6 +13,38 @@ def sh(l, m, theta, phi, field='real', normalization='quantum', condon_shortley=
         raise ValueError('Unknown field: ' + str(field))
 
 
+def sh_squared_norm(l, normalization='quantum', normalized_haar=True):
+    """
+    Compute the squared norm of the spherical harmonics.
+
+    The squared norm of a function on the sphere is defined as
+    |f|^2 = int_S^2 |f(x)|^2 dx
+    where dx is a Haar measure.
+
+    :param l: for some normalization conventions, the norm of a spherical harmonic Y^l_m depends on the degree l
+    :param normalization: normalization convention for the spherical harmonic
+    :param normalized_haar: whether to use the Haar measure da db sinb or the normalized Haar measure da db sinb / 4pi
+    :return: the squared norm of the spherical harmonic with respect to given measure
+    """
+    if normalization == 'quantum' or normalization == 'seismology':
+        # The quantum and seismology spherical harmonics are normalized with respect to the Haar measure
+        # dmu(theta, phi) = dtheta sin(theta) dphi
+        sqnorm = 1.
+    elif normalization == 'geodesy':
+        # The geodesy spherical harmonics are normalized with respect to the *normalized* Haar measure
+        # dmu(theta, phi) = dtheta sin(theta) dphi / 4pi
+        sqnorm = 4 * np.pi
+    elif normalization == 'nfft':
+        sqnorm = 4 * np.pi / (2 * l + 1)
+    else:
+        raise ValueError('Unknown normalization')
+
+    if normalized_haar:
+        return sqnorm / (4 * np.pi)
+    else:
+        return sqnorm
+
+
 def block_sh_ph(L_max, theta, phi):
     """
     Compute all spherical harmonics up to and including degree L_max, for angles theta and phi.

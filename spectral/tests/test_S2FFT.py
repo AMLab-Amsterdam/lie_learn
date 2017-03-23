@@ -11,7 +11,7 @@ def test_S2_FT_Naive():
 
     for grid_type in ('Gauss-Legendre', 'Clenshaw-Curtis'):
 
-        theta, phi = S2.meshgrid(b=L_max + 1, convention=grid_type)
+        theta, phi = S2.meshgrid(b=L_max + 1, grid_type=grid_type)
 
         for field in ('real', 'complex'):
             for normalization in ('quantum', 'seismology'):  # TODO Others should work but are not normalized
@@ -51,7 +51,7 @@ def test_S2_FT_Naive():
 def test_S2FFT():
 
     L_max = 6
-    theta, phi = S2.meshgrid(b=L_max + 1, convention='Driscoll-Healy')
+    theta, phi = S2.meshgrid(b=L_max + 1, grid_type='Driscoll-Healy')
     leg = setup_legendre_transform(b=L_max + 1)
 
     for l in range(L_max):

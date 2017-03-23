@@ -25,6 +25,8 @@ class SO3_FT_Naive(FFTBase):
 
         super().__init__()
 
+        # TODO allow user to specify the grid (now using SOFT implicitly)
+
         # Explicitly construct the Wigner-D matrices evaluated at each point in a grid in SO(3)
         self.D = []
         b = L_max + 1

@@ -10,12 +10,12 @@ def test_S2FFT_NFFT():
     b = 8
     convention = 'Gauss-Legendre'
     #convention = 'Clenshaw-Curtis'
-    x = S2.meshgrid(b=b, convention=convention)
+    x = S2.meshgrid(b=b, grid_type=convention)
     print(x[0].shape, x[1].shape)
     x = np.c_[x[0][..., None], x[1][..., None]]#.reshape(-1, 2)
     print(x.shape)
     x = x.reshape(-1, 2)
-    w = S2.quadrature_weights(b=b, convention=convention).flatten()
+    w = S2.quadrature_weights(b=b, grid_type=convention).flatten()
     F = S2FFT_NFFT(L_max=b, x=x, w=w)
 
     for l in range(0, b):

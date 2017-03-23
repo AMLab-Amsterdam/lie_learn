@@ -67,7 +67,11 @@ def wigner_D_matrix(l, alpha, beta, gamma,
             l,
             frm=('real', 'quantum', 'centered', 'cs'),
             to=(field, normalization, order, condon_shortley))
-        D = B.dot(D).dot(B.conj().T)
+        BB = change_of_basis_matrix(
+            l,
+            frm=(field, normalization, order, condon_shortley),
+            to=('real', 'quantum', 'centered', 'cs'))
+        D = B.dot(D).dot(BB)
 
         if field == 'real':
             # print('WIGNER D IMAG PART:', np.sum(np.abs(D.imag)))
@@ -119,6 +123,30 @@ def wigner_D_function(l, m, n, alpha, beta, gamma,
     :return: d^l_mn(beta) in the chosen basis
     """
     return wigner_D_matrix(l, alpha, beta, gamma, field, normalization, order, condon_shortley)[l + m, l + n]
+
+
+def wigner_D_norm(l, normalized_haar=True):
+    """
+    Compute the squared norm of the Wigner-D functions.
+
+    The squared norm of a function on the SO(3) is defined as
+    |f|^2 = int_SO(3) |f(g)|^2 dg
+    where dg is a Haar measure.
+
+    :param l: for some normalization conventions, the norm of a Wigner-D function D^l_mn depends on the degree l
+    :param normalization: normalization convention for the Wigner-D function
+    :param normalized_haar: whether to use the Haar measure da db sinb dc or the normalized Haar measure
+     da db sinb dc / 8pi^2
+    :return: the squared norm of the spherical harmonic with respect to given measure
+
+    :param l:
+    :param normalization:
+    :return:
+    """
+    if normalized_haar:
+        return 1. / (2 * l + 1)
+    else:
+        return (8 * np.pi ** 2) / (2 * l + 1)
 
 
 def wigner_d_naive(l, m, n, beta):
