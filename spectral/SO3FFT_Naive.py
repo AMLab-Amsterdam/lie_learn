@@ -260,6 +260,9 @@ def wigner_d_transform_analysis(f, wd):
 
     f_hat = []  # To store the result
     Z = 2 * np.pi / ((2 * b) ** 2)  # Normalizing constant
+    # NOTE: the factor 1. / (2 (2b)^2) comes from the quadrature integration - see S3.integrate_quad
+    # Maybe it makes more sense to integrate this factor into the quadrature weights.
+    # The factor 4 pi is probably related to the normalization of the Haar measure on S^2
 
     # The array F we have computed so far still has shape (2b, 2b, 2b),
     # where the axes correspond to (M, beta, M').

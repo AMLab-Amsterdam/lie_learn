@@ -124,6 +124,15 @@ def integrate(f, normalize=True):
 
 
 def integrate_quad(f, grid_type, normalize=True, w=None):
+    """
+    Integrate a function f : SO(3) -> R, sampled on a grid of type grid_type, using quadrature weights w.
+
+    :param f: an ndarray containing function values on a grid
+    :param grid_type: the type of grid used to sample f
+    :param normalize: whether to use the normalized Haar measure or not
+    :param w: the quadrature weights. If not given, they are computed.
+    :return: the integral of f over S^2.
+    """
 
     if grid_type == 'SOFT':
         b = f.shape[0] // 2
@@ -131,11 +140,14 @@ def integrate_quad(f, grid_type, normalize=True, w=None):
         if w is None:
             w = quadrature_weights(b, grid_type)
 
-        print(f.shape, w.shape)
-        integral = np.sum(f * w[None, :, None])
-        return integral
+        integral = np.sum(f * w[None, :, None] / (2. * (2 * b) ** 2))
     else:
         raise NotImplementedError('Unsupported grid_type:', grid_type)
+
+    if normalize:
+        return integral
+    else:
+        return integral * 8 * np.pi ** 2
 
 
 def quadrature_weights(b, grid_type='SOFT'):

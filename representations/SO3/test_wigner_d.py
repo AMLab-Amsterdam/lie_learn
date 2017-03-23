@@ -42,7 +42,7 @@ def check_normalization_wigner_D():
 
     NOTE: this test is subsumed in check_orthogonality_wigner_D, but that function is very slow
     """
-
+    w = S3.quadrature_weights(b=TEST_L_MAX + 1, grid_type='SOFT')
     for l in range(TEST_L_MAX):
         for m in range(-l, l + 1):
             for n in range(-l, l + 1):
@@ -51,15 +51,22 @@ def check_normalization_wigner_D():
                         for order in ('centered', 'block'):
                             for condon_shortley in ('cs', 'nocs'):
 
-                                f = lambda a, b, c: np.abs(wigner_D_matrix(
-                                    l=l, alpha=a, beta=b, gamma=c,
+                                f = lambda a, b, c: np.abs(wigner_D_function(
+                                    l=l, m=m, n=n, alpha=a, beta=b, gamma=c,
                                     field=field, normalization=normalization,
-                                    order=order, condon_shortley=condon_shortley)[l + m, l + n]) ** 2
-
+                                    order=order, condon_shortley=condon_shortley)) ** 2
                                 sqnorm_numerical = S3.integrate(f, normalize=True)
+
+                                D = make_D_sample_grid(b=TEST_L_MAX + 1, l=l, m=m, n=n,
+                                                       field=field, normalization=normalization,
+                                                       order=order, condon_shortley=condon_shortley)
+                                sqnorm_numerical2 = S3.integrate_quad(D * D.conj(), grid_type='SOFT',
+                                                                      normalize=True, w=w)
+
                                 sqnorm_analytical = 1. / (2 * l + 1)
-                                print(l, m, n, field, normalization, order, condon_shortley, sqnorm_numerical, sqnorm_analytical)
+                                print(l, m, n, field, normalization, order, condon_shortley, sqnorm_numerical, sqnorm_numerical2, sqnorm_analytical)
                                 assert np.isclose(sqnorm_numerical, sqnorm_analytical)
+                                assert np.isclose(sqnorm_numerical2, sqnorm_analytical)
 
 
 def check_orthogonality_wigner_D():
@@ -73,6 +80,7 @@ def check_orthogonality_wigner_D():
     The factor 8 pi^2 is removed if we integrate with respect to the normalized Haar measure.
     Here we test this equality by numerical integration.
     """
+    w = S3.quadrature_weights(b=TEST_L_MAX + 1, grid_type='SOFT')
     for field in ('real', 'complex'):
         for normalization in ('quantum', 'seismology', 'geodesy', 'nfft'):
             for order in ('centered', 'block'):
@@ -94,12 +102,23 @@ def check_orthogonality_wigner_D():
                                                     field=field, normalization=normalization,
                                                     order=order, condon_shortley=condon_shortley).conj()
 
+                                            D1 = make_D_sample_grid(b=TEST_L_MAX + 1, l=l, m=m, n=n,
+                                                                    field=field, normalization=normalization,
+                                                                    order=order, condon_shortley=condon_shortley)
+                                            D2 = make_D_sample_grid(b=TEST_L_MAX + 1, l=l2, m=m2, n=n2,
+                                                                    field=field, normalization=normalization,
+                                                                    order=order, condon_shortley=condon_shortley)
+
+                                            numerical_norm2 = S3.integrate_quad(D1 * D2.conj(), grid_type='SOFT',
+                                                                                normalize=True, w=w)
                                             numerical_norm = S3.integrate(f, normalize=True)
                                             analytical_norm = ((l == l2) * (m == m2) * (n == n2)) / (2 * l + 1)
                                             print(field, normalization, order, condon_shortley, l, m, n, l2, m2, n2,
                                                   np.round(numerical_norm, 2),
+                                                  np.round(numerical_norm2, 2),
                                                   np.round(analytical_norm, 2))
                                             assert np.isclose(numerical_norm, analytical_norm)
+                                            assert np.isclose(numerical_norm2, analytical_norm)
 
 
 def check_normalization_complex_wigner_d():
@@ -332,3 +351,23 @@ def check_normalization_wigner_d_real(L_max=TEST_L_MAX):
                                 vals[l][l + m, l + n] = val
 
     return correct, ratio, vals
+
+
+def make_D_sample_grid(b=4, l=0, m=0, n=0,
+                       field='complex', normalization='seismology', order='centered', condon_shortley='cs'):
+
+    from lie_learn.representations.SO3.wigner_d import wigner_D_function
+    D = lambda a, b, c: wigner_D_function(l, m, n, alpha, beta, gamma,
+                                          field=field, normalization=normalization,
+                                          order=order, condon_shortley=condon_shortley)
+
+    f = np.zeros((2 * b, 2 * b, 2 * b), dtype=complex if field == 'complex' else float)
+
+    for j1 in range(f.shape[0]):
+        alpha = 2 * np.pi * j1 / (2. * b)
+        for k in range(f.shape[1]):
+            beta = np.pi * (2 * k + 1) / (4. * b)
+            for j2 in range(f.shape[2]):
+                gamma = 2 * np.pi * j2 / (2. * b)
+                f[j1, k, j2] = D(alpha, beta, gamma)
+    return f
