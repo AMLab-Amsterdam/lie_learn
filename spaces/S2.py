@@ -236,7 +236,7 @@ def integrate_quad(f, grid_type, normalize=True, w=None):
         return integral
 
 
-def plot_sphere_func(f, grid='Clenshaw-Curtis', theta=None, phi=None, colormap='jet', fignum=0):
+def plot_sphere_func(f, grid='Clenshaw-Curtis', theta=None, phi=None, colormap='jet', fignum=0, normalize=True):
 
     #TODO: All grids except Clenshaw-Curtis have holes at the poles
 
@@ -244,6 +244,9 @@ def plot_sphere_func(f, grid='Clenshaw-Curtis', theta=None, phi=None, colormap='
     matplotlib.use('WxAgg')
     matplotlib.interactive(True)
     from mayavi import mlab
+
+    if normalize:
+        f = (f - np.min(f)) / (np.max(f) - np.min(f))
 
     if grid == 'Driscoll-Healy':
         b = f.shape[0] / 2
@@ -271,6 +274,56 @@ def plot_sphere_func(f, grid='Clenshaw-Curtis', theta=None, phi=None, colormap='
 
     #mlab.view(90, 70, 6.2, (-1.3, -2.9, 0.25))
     mlab.show()
+
+
+def plot_sphere_func2(f, grid='Clenshaw-Curtis', theta=None, phi=None, colormap='jet', fignum=0,  normalize=True):
+    import matplotlib.pyplot as plt
+    from matplotlib import cm, colors
+    from mpl_toolkits.mplot3d import Axes3D
+    import numpy as np
+    from scipy.special import sph_harm
+
+    if normalize:
+        f = (f - np.min(f)) / (np.max(f) - np.min(f))
+
+    if grid == 'Driscoll-Healy':
+        b = f.shape[0] // 2
+    elif grid == 'Clenshaw-Curtis':
+        b = (f.shape[0] - 2) // 2
+    elif grid == 'SOFT':
+        b = f.shape[0] // 2
+    elif grid == 'Gauss-Legendre':
+        b = (f.shape[0] - 2) // 2
+
+    if theta is None or phi is None:
+        theta, phi = meshgrid(b=b, grid_type=grid)
+
+    phi = np.r_[phi, phi[0, :][None, :]]
+    theta = np.r_[theta, theta[0, :][None, :]]
+    f = np.r_[f, f[0, :][None, :]]
+
+    x = np.sin(theta) * np.cos(phi)
+    y = np.sin(theta) * np.sin(phi)
+    z = np.cos(theta)
+
+    # m, l = 2, 3
+    # Calculate the spherical harmonic Y(l,m) and normalize to [0,1]
+    # fcolors = sph_harm(m, l, theta, phi).real
+    # fmax, fmin = fcolors.max(), fcolors.min()
+    # fcolors = (fcolors - fmin) / (fmax - fmin)
+    print(x.shape, f.shape)
+
+    if f.ndim == 2:
+        f = cm.gray(f)
+        print('2')
+
+    # Set the aspect ratio to 1 so our sphere looks spherical
+    fig = plt.figure(figsize=plt.figaspect(1.))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(x, y, z, rstride=1, cstride=1, facecolors=f ) # cm.gray(f))
+    # Turn off the axis planes
+    ax.set_axis_off()
+    plt.show()
 
 
 def _clenshaw_curtis_weights(n):
