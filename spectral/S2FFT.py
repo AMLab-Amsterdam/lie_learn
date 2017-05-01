@@ -101,6 +101,7 @@ def setup_legendre_transform(b):
 def setup_legendre_transform_indices(b):
     ms = [list(range(-ls, ls + 1)) for ls in range(b)]
     ms = [mm for sublist in ms for mm in sublist]  # 0, -1, 0, 1, -2, -1, 0, 1, 2, ...
+    ms = [mm % (2 * b) for mm in ms]
     return ms
 
 
