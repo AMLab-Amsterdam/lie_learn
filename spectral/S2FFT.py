@@ -98,7 +98,13 @@ def setup_legendre_transform(b):
     return lt
 
 
-def sphere_fft(f, lt=None):
+def setup_legendre_transform_indices(b):
+    ms = [list(range(-ls, ls + 1)) for ls in range(b)]
+    ms = [mm for sublist in ms for mm in sublist]  # 0, -1, 0, 1, -2, -1, 0, 1, 2, ...
+    return ms
+
+
+def sphere_fft(f, lt=None, lti=None):
     """
     Compute the Spherical Fourier transform of f.
     We use complex, seismology-normalized, centered spherical harmonics, which are orthonormal (see rep_bases.py).
@@ -138,17 +144,13 @@ def sphere_fft(f, lt=None):
     assert f.shape[0] % 2 == 0
     b = f.shape[0] // 2
 
-    # First, FFT along the alpha axis (axis 0)
-    F = fft(f, axis=0)
-
     if lt is None:
         lt = setup_legendre_transform(b)
 
-    i = 0
-    f_hat = np.zeros(np.sum(np.arange(b) * 2 + 1), dtype=complex)
-    for l in range(b):
-        for m in range(-l, l + 1):
-            f_hat[i] = lt[i, :].dot(F[m, :])
-            i += 1
+    if lti is None:
+        lti = setup_legendre_transform_indices(b)
 
-    return f_hat
+    # First, FFT along the alpha axis (axis 0)
+    F = fft(f, axis=0)
+
+    return (F[lti] * lt).sum(axis=1)
