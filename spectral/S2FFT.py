@@ -133,14 +133,13 @@ def sphere_fft(f, lt=None):
     :return: f_hat, the spherical Fourier transform of f. This is an array of size sum_l=0^{b-1} 2 l + 1.
              the coefficients are ordered as (l=0, m=0), (l=1, m=-1), (l=1, m=0), (l=1,m=1), ...
     """
+
     assert f.shape[0] == f.shape[1]
     assert f.shape[0] % 2 == 0
     b = f.shape[0] // 2
 
     # First, FFT along the alpha axis (axis 0)
     F = fft(f, axis=0)
-    F = fftshift(F, axes=0)
-    f0 = F.shape[0] // 2  # The index of the 0-frequency / DC component
 
     if lt is None:
         lt = setup_legendre_transform(b)
@@ -149,7 +148,7 @@ def sphere_fft(f, lt=None):
     f_hat = np.zeros(np.sum(np.arange(b) * 2 + 1), dtype=complex)
     for l in range(b):
         for m in range(-l, l + 1):
-            f_hat[i] = lt[i, :].dot(F[m + f0, :])
+            f_hat[i] = lt[i, :].dot(F[m, :])
             i += 1
 
     return f_hat
