@@ -281,11 +281,9 @@ def wigner_d_transform_analysis(f, wd):
         )
     return f_hat
 
-
-def get_wigner_analysis_sub_block_indices(l, b):
+def get_wigner_analysis_sub_block_indices(b, l):
     """ computes the indices for the sub-block at order l
     used in the wigner analysis """
-
     L = 2 * l + 1
     n_cols = 2 * b
     offset = b - l
@@ -297,7 +295,7 @@ def get_wigner_analysis_sub_block_indices(l, b):
 def get_wigner_analysis_block_indices(b):
     """ computes the flattened vector of all indices of the sub-blocks
     up to order b, used in the wigner analyisis"""
-    return np.concatenate([get_wigner_analysis_sub_block_indices(l, b).reshape(-1)
+    return np.concatenate([get_wigner_analysis_sub_block_indices(b, l).reshape(-1)
                            for l in range(b)])
 
 
