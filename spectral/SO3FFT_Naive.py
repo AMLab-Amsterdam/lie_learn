@@ -198,6 +198,7 @@ def SO3_FFT_analyze(f, wd):
     # Then, perform the Wigner-d transform
     return wigner_d_transform_analysis(F, wd)
 
+
 def SO3_FFT_synthesize(f_hat, d):
     """
     Perform the inverse (spectral to spatial) SO(3) Fourier transform.
@@ -280,7 +281,8 @@ def wigner_d_transform_analysis(f, wd):
         )
     return f_hat
 
-def get_wigner_analysis_sub_block_indices(l):
+
+def get_wigner_analysis_sub_block_indices(l, b):
     """ computes the indices for the sub-block at order l
     used in the wigner analysis """
 
@@ -288,20 +290,22 @@ def get_wigner_analysis_sub_block_indices(l):
     n_cols = 2 * b
     offset = b - l
     tiles = np.tile(np.arange(L), L).reshape(L, L) + offset
-    row_offset = n_cols * (np.arange(L)[:,None]  + offset)
+    row_offset = n_cols * (np.arange(L)[:, None] + offset)
     return tiles + row_offset
+
 
 def get_wigner_analysis_block_indices(b):
     """ computes the flattened vector of all indices of the sub-blocks
     up to order b, used in the wigner analyisis"""
+    return np.concatenate([get_wigner_analysis_sub_block_indices(l, b).reshape(-1)
+                           for l in range(b)])
 
-    return np.concatenate([ get_wigner_analysis_sub_block_indices(l).reshape(-1)
-                            for l in range(b) ])
 
 def get_flattened_weighted_ds(wd):
-    """ flattenes the weighted d matrices into one vector """
-    return np.concatenate([ m.transpose(0,2,1).reshape(-1,m.shape[1])
-                            for m in wd ])
+    """ flattens the weighted d matrices into one vector """
+    return np.concatenate([m.transpose(0, 2, 1).reshape(-1, m.shape[1])
+                           for m in wd])
+
 
 def wigner_d_transform_analysis_vectorized(f, wd_flat, idxs):
     """ computes the wigner transform analysis in a vectorized way
@@ -311,8 +315,9 @@ def wigner_d_transform_analysis_vectorized(f, wd_flat, idxs):
     wd_flat: the flattened weighted wigner d functions
     idxs: the array of indices containing all analysis blocks
     """
-    f_flat = f.transpose([0,2,1]).reshape(-1,f.shape[1])[idxs]
+    f_flat = f.transpose([0, 2, 1]).reshape(-1, f.shape[1])[idxs]
     return (f_flat * wd_flat).sum(axis=1)
+
 
 def wigner_d_transform_synthesis(f_hat, d):
     """
@@ -375,7 +380,7 @@ def zero_padding_inds(b):
     :return:
     """
 
-    inds = np.zeros(b * 2 * b * 2 * b)
+    inds = np.zeros(b * 2 * b * 2 * b, dtype=np.int)
     for l in range(b):
         for m in range(-l, l + 1):
             for n in range(-l, l + 1):
