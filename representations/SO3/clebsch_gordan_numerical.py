@@ -61,7 +61,7 @@ def compute_CG_matrix(N=1000):
         for n1 in range(-l, l + 1):
             for m2 in range(-l, l + 1):
                 for n2 in range(-l, l + 1):
-                    print m1, n1, m2, n2
+                    print(m1, n1, m2, n2)
                     _, _, w = compute_CG_3D(m1, n1, m2, n2, N)
                     CG[:, l + m1, l + n1, l + m2, l + n2] = w
 
@@ -76,12 +76,12 @@ if __name__ == '__main__':
                1. / 6., 2. / 3.,
                1. / (2 * np.sqrt(3)), -1. / (2 * np.sqrt(3)),
                1. / np.sqrt(3), -1. / np.sqrt(3)]
-    print 'Hypothetical exact uniques:'
-    print np.sort(uniques)
-    print 'Numerically obtained uniques (rounded to 5 decimals)'
-    print np.unique(np.round(CG, 5))
+    print('Hypothetical exact uniques:')
+    print(np.sort(uniques))
+    print('Numerically obtained uniques (rounded to 5 decimals)')
+    print(np.unique(np.round(CG, 5)))
     for value in uniques:
         inds = np.nonzero(np.isclose(CG, value))
         CG_exact[inds] = value
 
-    print 'Absolute error between exact and numerical:', np.sum(np.abs(CG_exact - CG))
+    print('Absolute error between exact and numerical:', np.sum(np.abs(CG_exact - CG)))
