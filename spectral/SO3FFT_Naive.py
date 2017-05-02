@@ -5,6 +5,7 @@ from lie_learn.representations.SO3.irrep_bases import change_of_basis_matrix
 from lie_learn.representations.SO3.pinchon_hoggan.pinchon_hoggan_dense import rot_mat, Jd
 from lie_learn.representations.SO3.wigner_d import wigner_d_matrix, wigner_D_matrix
 import lie_learn.spaces.S3 as S3
+from lie_learn.representations.SO3.indexing import flat_ind_zp_so3, flat_ind_so3
 
 from .FFTBase import FFTBase
 from scipy.fftpack import fft2, ifft2, fftshift
@@ -275,7 +276,7 @@ def wigner_d_transform_analysis(f, wd):
         # f0 - l <= m,n < f0 + l + 1
         # for 0-based indexing and zero-frequency location f0
         f_hat.append(
-            np.einsum('ijk,ijk->ik', wd[l], f_sub[l]) * Z
+            np.einsum('mbn,mbn->mn', wd[l], f_sub[l]) * Z
         )
     return f_hat
 
@@ -331,6 +332,53 @@ def wigner_d_transform_synthesis(f_hat, d):
         F[b - l:b + l + 1, :, b - l:b + l + 1] += df_hat[l]
 
     return F
+
+
+def wigner_d_transform_synthesis_vectorized(f_hat_flat, dv, inds):
+    b = dv.shape[0]  # bandwidth
+    f_hat_vec = f_hat_flat[inds]
+    f_hat_vec = f_hat_vec.reshape(b, 2 * b, 1, 2 * b)
+    return np.einsum('lmbn,lmbn->mbn', f_hat_vec, dv)
+
+
+def vectorize_d(d):
+    """
+    In order to write the Wigner-d synthesis transform in a vectorized manner, we need to create a tensor of 
+     Wigner-d function evaluations with special padding.
+    
+    :param d: 
+    :return: 
+    """
+    b = len(d)
+
+    # Create a dense tensor with axes for l, m, beta, n
+    dv = np.zeros((b, 2 * b, 2 * b, 2 * b))
+
+    for l in range(b):
+        dv[l][b - l:b + l + 1, :, b - l:b + l + 1] = d[l]
+
+    return dv
+
+
+def zero_padding_inds(b):
+    """
+    To vectorize the Wigner-d transform, we have to take a list of matrices f_hat = [f_hat^0, ..., f_hat^L],
+    where f_hat^l has shape (2l+1, 2l+1), and flatten it into a vector.
+    Then we turn turn it into a single array F of shape (b, 2b, 2b) with axes l, m, n.
+    The (2b, 2b) matrix F[l] has non-zeros in the (2l+1, 2l+1) center.
+    
+    To implement the latter operation, we need indices. These are computed by this function.
+    
+    :param f_hat: 
+    :return: 
+    """
+
+    inds = np.zeros(b * 2 * b * 2 * b)
+    for l in range(b):
+        for m in range(-l, l + 1):
+            for n in range(-l, l + 1):
+                inds[flat_ind_zp_so3(l, m, n, b)] = flat_ind_so3(l, m, n)
+    return inds
 
 
 def setup_d_transform(b, L2_normalized,
