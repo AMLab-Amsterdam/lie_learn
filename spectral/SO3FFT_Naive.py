@@ -281,6 +281,7 @@ def wigner_d_transform_analysis(f, wd):
         )
     return f_hat
 
+
 def get_wigner_analysis_sub_block_indices(b, l):
     """ computes the indices for the sub-block at order l
     used in the wigner analysis """

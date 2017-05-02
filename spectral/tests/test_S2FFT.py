@@ -2,7 +2,7 @@ import numpy as np
 
 import lie_learn.spaces.S2 as S2
 from lie_learn.representations.SO3.spherical_harmonics import sh
-from lie_learn.spectral.S2FFT import setup_legendre_transform, sphere_fft, S2_FT_Naive
+from lie_learn.spectral.S2FFT import setup_legendre_transform, setup_legendre_transform_indices, sphere_fft, S2_FT_Naive
 
 
 def test_S2_FT_Naive():
@@ -50,17 +50,18 @@ def test_S2_FT_Naive():
 
 def test_S2FFT():
 
-    L_max = 6
-    theta, phi = S2.meshgrid(b=L_max + 1, grid_type='Driscoll-Healy')
-    leg = setup_legendre_transform(b=L_max + 1)
+    L_max = 10
+    beta, alpha = S2.meshgrid(b=L_max + 1, grid_type='Driscoll-Healy')
+    lt = setup_legendre_transform(b=L_max + 1)
+    lti = setup_legendre_transform_indices(b=L_max + 1)
 
     for l in range(L_max):
         for m in range(-l, l + 1):
 
-            Y = sh(l, m, theta, phi,
+            Y = sh(l, m, beta, alpha,
                    field='complex', normalization='seismology', condon_shortley=True)
 
-            y_hat = sphere_fft(Y, leg)
+            y_hat = sphere_fft(Y, lt, lti)
 
             # The flat index for (l, m) is l^2 + l + m
             # Before the harmonics of degree l, there are this many harmonics: sum_{i=0}^{l-1} 2i+1 = l^2
@@ -70,8 +71,12 @@ def test_S2FFT():
             y_hat_true[l**2 + l + m] = 1
 
             diff = np.sum(np.abs(y_hat - y_hat_true))
-            print(l, m, diff)
+            nz = 1. - np.isclose(y_hat, 0.)
+            diff_nz = np.sum(np.abs(nz - y_hat_true))
+            print(l, m, diff, diff_nz)
             print(np.round(y_hat, 4))
             print(y_hat_true)
-            # assert np.isclose(diff, 0.) #TODO this is not working yet
+            # assert np.isclose(diff, 0.)  # TODO make this work
+            print(nz)
+            assert np.isclose(diff_nz, 0.)
 

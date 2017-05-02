@@ -9,27 +9,31 @@ def change_coordinates(coords, p_from='C', p_to='S'):
     """
     Change Spherical to Cartesian coordinates and vice versa, for points x in S^2.
 
-    In the spherical system, we have coordinates theta and phi,
-    where theta in [0, pi] and phi in [0, 2pi]
+    In the spherical system, we have coordinates beta and alpha,
+    where beta in [0, pi] and alpha in [0, 2pi]
+    
+    We use the names beta and alpha for compatibility with the SO(3) code (S^2 being a quotient SO(3)/SO(2)).
+    Many sources, like wikipedia use theta=beta and phi=alpha.
 
-    :param conversion:
-    :param coords:
-    :return:
+    :param coords: coordinate array
+    :param p_from: 'C' for Cartesian or 'S' for spherical coordinates
+    :param p_to: 'C' for Cartesian or 'S' for spherical coordinates
+    :return: new coordinates
     """
     if p_from == p_to:
         return coords
     elif p_from == 'S' and p_to == 'C':
 
-        theta = coords[..., 0]
-        phi = coords[..., 1]
+        beta = coords[..., 0]
+        alpha = coords[..., 1]
         r = 1.
 
-        out = np.empty(theta.shape + (3,))
+        out = np.empty(beta.shape + (3,))
 
-        ct = np.cos(theta)
-        cp = np.cos(phi)
-        st = np.sin(theta)
-        sp = np.sin(phi)
+        ct = np.cos(beta)
+        cp = np.cos(alpha)
+        st = np.sin(beta)
+        sp = np.sin(alpha)
         out[..., 0] = r * st * cp  # x
         out[..., 1] = r * st * sp  # y
         out[..., 2] = r * ct       # z
@@ -42,8 +46,8 @@ def change_coordinates(coords, p_from='C', p_to='S'):
         z = coords[..., 2]
 
         out = np.empty(x.shape + (2,))
-        out[..., 0] = np.arccos(z)         # theta
-        out[..., 1] = np.arctan2(y, x)     # phi
+        out[..., 0] = np.arccos(z)         # beta
+        out[..., 1] = np.arctan2(y, x)     # alpha
         return out
 
     else:
@@ -56,20 +60,20 @@ def meshgrid(b, grid_type='Driscoll-Healy'):
     There are various ways to setup a grid on the sphere.
 
     if grid_type == 'Driscoll-Healy', we follow the grid_type from [4], which is also used in [5]:
-    theta_j = pi j / (2 b)     for j = 0, ..., 2b - 1
-    phi_k = pi k / b           for k = 0, ..., 2b - 1
+    beta_j = pi j / (2 b)     for j = 0, ..., 2b - 1
+    alpha_k = pi k / b           for k = 0, ..., 2b - 1
 
     if grid_type == 'SOFT', we follow the grid_type from [1] and [6]
-    theta_j = pi (2 j + 1) / (4 b)   for j = 0, ..., 2b - 1
-    phi_k = pi k / b                for k = 0, ..., 2b - 1
+    beta_j = pi (2 j + 1) / (4 b)   for j = 0, ..., 2b - 1
+    alpha_k = pi k / b                for k = 0, ..., 2b - 1
 
     if grid_type == 'Clenshaw-Curtis', we use the Clenshaw-Curtis grid, as defined in [2] (section 6):
-    theta_j = j pi / (2b)     for j = 0, ..., 2b
-    phi_k = k pi / (b + 1)    for k = 0, ..., 2b + 1
+    beta_j = j pi / (2b)     for j = 0, ..., 2b
+    alpha_k = k pi / (b + 1)    for k = 0, ..., 2b + 1
 
     if grid_type == 'Gauss-Legendre', we use the Gauss-Legendre grid, as defined in [2] (section 6) and [7] (eq. 2):
-    theta_j = the Gauss-Legendre nodes    for j = 0, ..., b
-    phi_k = k pi / (b + 1),               for k = 0, ..., 2 b + 1
+    beta_j = the Gauss-Legendre nodes    for j = 0, ..., b
+    alpha_k = k pi / (b + 1),               for k = 0, ..., 2 b + 1
 
     if grid_type == 'HEALPix', we use the HEALPix grid, see [2] (section 6):
     TODO
@@ -101,26 +105,26 @@ def meshgrid(b, grid_type='Driscoll-Healy'):
     :param b: the bandwidth / resolution
     :return: a meshgrid on S^2
     """
-    return np.meshgrid(*linspace(b, grid_type))
+    return np.meshgrid(*linspace(b, grid_type), indexing='ij')
 
 
 def linspace(b, grid_type='Driscoll-Healy'):
     if grid_type == 'Driscoll-Healy':
-        theta = np.arange(2 * b) * np.pi / (2. * b)
-        phi = np.arange(2 * b) * np.pi / b
+        beta = np.arange(2 * b) * np.pi / (2. * b)
+        alpha = np.arange(2 * b) * np.pi / b
     elif grid_type == 'SOFT':
-        theta = np.pi * (2 * np.arange(2 * b) + 1) / (4. * b)
-        phi = np.arange(2 * b) * np.pi / b
+        beta = np.pi * (2 * np.arange(2 * b) + 1) / (4. * b)
+        alpha = np.arange(2 * b) * np.pi / b
     elif grid_type == 'Clenshaw-Curtis':
-        # theta = np.arange(2 * b + 1) * np.pi / (2 * b)
-        # phi = np.arange(2 * b + 2) * np.pi / (b + 1)
-        # Must use np.linspace to prevent numerical errors that cause theta > pi
-        theta = np.linspace(0, np.pi, 2 * b + 1)
-        phi = np.linspace(0, 2 * np.pi, 2 * b + 2, endpoint=False)
+        # beta = np.arange(2 * b + 1) * np.pi / (2 * b)
+        # alpha = np.arange(2 * b + 2) * np.pi / (b + 1)
+        # Must use np.linspace to prevent numerical errors that cause beta > pi
+        beta = np.linspace(0, np.pi, 2 * b + 1)
+        alpha = np.linspace(0, 2 * np.pi, 2 * b + 2, endpoint=False)
     elif grid_type == 'Gauss-Legendre':
         x, _ = leggauss(b + 1)  # TODO: leggauss docs state that this may not be only stable for orders > 100
-        theta = np.arccos(x)
-        phi = np.arange(2 * b + 2) * np.pi / (b + 1)
+        beta = np.arccos(x)
+        alpha = np.arange(2 * b + 2) * np.pi / (b + 1)
     elif grid_type == 'HEALPix':
         #TODO: implement this here so that we don't need the dependency on healpy / healpix_compat
         from healpix_compat import healpy_sphere_meshgrid
@@ -129,7 +133,7 @@ def linspace(b, grid_type='Driscoll-Healy'):
         raise NotImplementedError('Not implemented yet; see Fast evaluation of quadrature formulae on the sphere.')
     else:
         raise ValueError('Unknown grid_type:' + grid_type)
-    return theta, phi
+    return beta, alpha
 
 
 def quadrature_weights(b, grid_type='Gauss-Legendre'):
@@ -163,14 +167,14 @@ def quadrature_weights(b, grid_type='Gauss-Legendre'):
         #            sum += eps_l_b / (1 - 4 * l ** 2) * np.cos(j * l * np.pi / b)
         #        W[k, j] *= sum
         w = _clenshaw_curtis_weights(n=2 * b)
-        W = np.empty((2 * b + 2, 2 * b + 1))
-        W[:] = w[None, :]
+        W = np.empty((2 * b + 1, 2 * b + 2))
+        W[:] = w[:, None]
     elif grid_type == 'Gauss-Legendre':
         # We found this formula in:
         # "A Fast Algorithm for Spherical Grid Rotations and its Application to Singular Quadrature"
         # eq. 10
         _, w = leggauss(b + 1)
-        W = w[None, :] * (2 * np.pi / (2 * b + 2) * np.ones(2 * b + 2)[:, None])
+        W = w[:, None] * (2 * np.pi / (2 * b + 2) * np.ones(2 * b + 2)[None, :])
     elif grid_type == 'SOFT':
         print("WARNING: SOFT quadrature weights don't work yet")
         k = np.arange(0, b)
@@ -179,7 +183,7 @@ def quadrature_weights(b, grid_type='Gauss-Legendre'):
                               * np.sin((2 * j + 1) * (2 * k + 1)
                                        * np.pi / (4. * b))))
                       for j in range(2 * b)])
-        W = w[None, :] * np.ones(2 * b)[:, None]
+        W = w[:, None] * np.ones(2 * b)[None, :]
     else:
         raise ValueError('Unknown grid_type:' + str(grid_type))
 
@@ -189,16 +193,16 @@ def quadrature_weights(b, grid_type='Gauss-Legendre'):
 def integrate(f, normalize=True):
     """
     Integrate a function f : S^2 -> R over the sphere S^2, using the invariant integration measure
-    mu((theta, phi)) = sin(theta) dtheta dphi
+    mu((beta, alpha)) = sin(beta) dbeta dalpha
     i.e. this returns
-    int_S^2 f(x) dmu(x) = int_0^2pi int_0^pi f(theta, phi) sin(theta) dtheta dphi
+    int_S^2 f(x) dmu(x) = int_0^2pi int_0^pi f(beta, alpha) sin(beta) dbeta dalpha
 
     :param f: a function of two scalar variables returning a scalar.
     :return: the integral of f over the 2-sphere
     """
     from scipy.integrate import quad
 
-    f2 = lambda phi: quad(lambda theta: f(theta, phi) * np.sin(theta),
+    f2 = lambda alpha: quad(lambda beta: f(beta, alpha) * np.sin(beta),
                           a=0,
                           b=np.pi)[0]
     integral = quad(f2, 0, 2 * np.pi)[0]
@@ -223,7 +227,7 @@ def integrate_quad(f, grid_type, normalize=True, w=None):
     if grid_type != 'Gauss-Legendre' and grid_type != 'Clenshaw-Curtis':
         raise NotImplementedError
 
-    b = (f.shape[0] - 2) // 2  # This works for Gauss-Legendre and Clenshaw-Curtis
+    b = (f.shape[1] - 2) // 2  # This works for Gauss-Legendre and Clenshaw-Curtis
 
     if w is None:
         w = quadrature_weights(b, grid_type)
@@ -236,9 +240,10 @@ def integrate_quad(f, grid_type, normalize=True, w=None):
         return integral
 
 
-def plot_sphere_func(f, grid='Clenshaw-Curtis', theta=None, phi=None, colormap='jet', fignum=0, normalize=True):
+def plot_sphere_func(f, grid='Clenshaw-Curtis', beta=None, alpha=None, colormap='jet', fignum=0, normalize=True):
 
     #TODO: All grids except Clenshaw-Curtis have holes at the poles
+    # TODO: update this function now that we changed the order of axes in f
 
     import matplotlib
     matplotlib.use('WxAgg')
@@ -257,16 +262,16 @@ def plot_sphere_func(f, grid='Clenshaw-Curtis', theta=None, phi=None, colormap='
     elif grid == 'Gauss-Legendre':
         b = (f.shape[0] - 2) / 2
 
-    if theta is None or phi is None:
-        theta, phi = meshgrid(b=b, grid_type=grid)
+    if beta is None or alpha is None:
+        beta, alpha = meshgrid(b=b, grid_type=grid)
 
-    phi = np.r_[phi, phi[0, :][None, :]]
-    theta = np.r_[theta, theta[0, :][None, :]]
+    alpha = np.r_[alpha, alpha[0, :][None, :]]
+    beta = np.r_[beta, beta[0, :][None, :]]
     f = np.r_[f, f[0, :][None, :]]
 
-    x = np.sin(theta) * np.cos(phi)
-    y = np.sin(theta) * np.sin(phi)
-    z = np.cos(theta)
+    x = np.sin(beta) * np.cos(alpha)
+    y = np.sin(beta) * np.sin(alpha)
+    z = np.cos(beta)
 
     mlab.figure(fignum, bgcolor=(1, 1, 1), fgcolor=(0, 0, 0), size=(600, 400))
     mlab.clf()
@@ -276,7 +281,8 @@ def plot_sphere_func(f, grid='Clenshaw-Curtis', theta=None, phi=None, colormap='
     mlab.show()
 
 
-def plot_sphere_func2(f, grid='Clenshaw-Curtis', theta=None, phi=None, colormap='jet', fignum=0,  normalize=True):
+def plot_sphere_func2(f, grid='Clenshaw-Curtis', beta=None, alpha=None, colormap='jet', fignum=0,  normalize=True):
+    # TODO: update this  function now that we have changed the order of axes in f
     import matplotlib.pyplot as plt
     from matplotlib import cm, colors
     from mpl_toolkits.mplot3d import Axes3D
@@ -295,20 +301,20 @@ def plot_sphere_func2(f, grid='Clenshaw-Curtis', theta=None, phi=None, colormap=
     elif grid == 'Gauss-Legendre':
         b = (f.shape[0] - 2) // 2
 
-    if theta is None or phi is None:
-        theta, phi = meshgrid(b=b, grid_type=grid)
+    if beta is None or alpha is None:
+        beta, alpha = meshgrid(b=b, grid_type=grid)
 
-    phi = np.r_[phi, phi[0, :][None, :]]
-    theta = np.r_[theta, theta[0, :][None, :]]
+    alpha = np.r_[alpha, alpha[0, :][None, :]]
+    beta = np.r_[beta, beta[0, :][None, :]]
     f = np.r_[f, f[0, :][None, :]]
 
-    x = np.sin(theta) * np.cos(phi)
-    y = np.sin(theta) * np.sin(phi)
-    z = np.cos(theta)
+    x = np.sin(beta) * np.cos(alpha)
+    y = np.sin(beta) * np.sin(alpha)
+    z = np.cos(beta)
 
     # m, l = 2, 3
     # Calculate the spherical harmonic Y(l,m) and normalize to [0,1]
-    # fcolors = sph_harm(m, l, theta, phi).real
+    # fcolors = sph_harm(m, l, beta, alpha).real
     # fmax, fmin = fcolors.max(), fcolors.min()
     # fcolors = (fcolors - fmin) / (fmax - fmin)
     print(x.shape, f.shape)
