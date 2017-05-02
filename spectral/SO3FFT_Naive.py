@@ -295,7 +295,7 @@ def get_wigner_analysis_block_indices(b):
     """ computes the flattened vector of all indices of the sub-blocks
     up to order b, used in the wigner analyisis"""
 
-    return np.concatenate([ get_wigner_analysis_sub_block_indices(l).reshape(-1)
+    return np.concatenate([ get_wigner_analysis_sub_block_indices(b, l).reshape(-1)
                             for l in range(b) ])
 
 def get_flattened_weighted_ds(wd):
