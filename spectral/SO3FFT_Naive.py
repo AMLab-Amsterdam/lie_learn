@@ -280,37 +280,39 @@ def wigner_d_transform_analysis(f, wd):
         )
     return f_hat
 
-def wigner_d_transform_analysis_vectorized(f, wd):
-    assert f.shape[0] == f.shape[1]
-    assert f.shape[1] == f.shape[2]
-    assert f.shape[0] % 2 == 0
+def get_wigner_analysis_sub_block_indices(l):
+    """ computes the indices for the sub-block at order l
+    used in the wigner analysis """
 
-    b = f.shape[0] // 2   # The bandwidth
-    f0 = f.shape[0] // 2  # The index of the 0-frequency / DC component
+    L = 2 * l + 1
+    n_cols = 2 * b
+    offset = b - l
+    tiles = np.tile(np.arange(L), L).reshape(L, L) + offset
+    row_offset = n_cols * (np.arange(L)[:,None]  + offset)
+    return tiles + row_offset
 
-    def _get_sub_matrix_idxs(l):
-        L = 2 * l + 1
-        n_cols = 2 * b
-        offset = b - l
-        tiles = np.tile(np.arange(L), L).reshape(L, L) + offset
-        row_offset = n_cols * (np.arange(L)[:,None]  + offset)
-        return tiles + row_offset
+def get_wigner_analysis_block_indices(b):
+    """ computes the flattened vector of all indices of the sub-blocks
+    up to order b, used in the wigner analyisis"""
 
-    idxs = np.concatenate([ _get_sub_matrix_idxs(l).reshape(-1)
+    return np.concatenate([ get_wigner_analysis_sub_block_indices(l).reshape(-1)
                             for l in range(b) ])
 
-    F_flat = F.transpose([0,2,1]).reshape(-1,F.shape[1])[idxs]
+def get_flattened_weighted_ds(wd):
+    """ flattenes the weighted d matrices into one vector """
+    return np.concatenate([ m.transpose(0,2,1).reshape(-1,m.shape[1])
+                            for m in wd ])
 
-    tF_flat = (F_flat * wd_flat).sum(axis=1)
+def wigner_d_transform_analysis_vectorized(f, wd_flat, idxs):
+    """ computes the wigner transform analysis in a vectorized way
+    returns the flattened blocks of f_hat as a single vector
 
-    blocks = []
-    i = 0
-    for l in range(b):
-        L = 2*l+1
-        blocks.append(tF_flat[i:L**2].reshape(2*l+1, 2*l+1))
-        i += L
-
-    return blocks
+    f: the so3 signal,
+    wd_flat: the flattened weighted wigner d functions
+    idxs: the array of indices containing all analysis blocks
+    """
+    f_flat = f.transpose([0,2,1]).reshape(-1,f.shape[1])[idxs]
+    return (f_flat * wd_flat).sum(axis=1)
 
 def wigner_d_transform_synthesis(f_hat, d):
     """
@@ -343,11 +345,11 @@ def wigner_d_transform_synthesis_vectorized(f_hat_flat, dv, inds):
 
 def vectorize_d(d):
     """
-    In order to write the Wigner-d synthesis transform in a vectorized manner, we need to create a tensor of 
+    In order to write the Wigner-d synthesis transform in a vectorized manner, we need to create a tensor of
      Wigner-d function evaluations with special padding.
-    
-    :param d: 
-    :return: 
+
+    :param d:
+    :return:
     """
     b = len(d)
 
@@ -366,11 +368,11 @@ def zero_padding_inds(b):
     where f_hat^l has shape (2l+1, 2l+1), and flatten it into a vector.
     Then we turn turn it into a single array F of shape (b, 2b, 2b) with axes l, m, n.
     The (2b, 2b) matrix F[l] has non-zeros in the (2l+1, 2l+1) center.
-    
+
     To implement the latter operation, we need indices. These are computed by this function.
-    
-    :param f_hat: 
-    :return: 
+
+    :param f_hat:
+    :return:
     """
 
     inds = np.zeros(b * 2 * b * 2 * b)
