@@ -6,7 +6,7 @@
 # change this as needed
 #libdvIncludeDir = "/usr/include/libdv"
 
-import sys, os, stat, subprocess
+import glob, sys, os, stat, subprocess
 from distutils.core import setup
 from distutils.extension import Extension
 import numpy as np
@@ -45,8 +45,17 @@ def makeExtension(extName):
         libraries = [],
         )
 
+def find_packages(root=".", excluded=[], prefix=""):
+    packages = []
+    package_dir = {}
+    for p in glob.glob('{0}/**/__init__.py'.format(root), recursive=True):
+        ps = p.split(os.path.sep)
+        if not any([ p.startswith(q) for q in excluded ]):
+            newp = ".".join([prefix] + ps[1:-1])
+            packages.append(newp)
+            package_dir[newp] = os.path.join(*ps[:-1])
+    return packages, package_dir
 
-    
 # get the list of extensions
 extNames = scandir("./")
 print(extNames)
@@ -55,10 +64,15 @@ print(extNames)
 extensions = [makeExtension(name) for name in extNames]
 print(extensions)
 
+packages, package_dir = find_packages(excluded=["./build"], prefix="lie_learn")
+print(packages, package_dir)
+
 # finally, we can pass all this to distutils
 setup(
   name="lie_learn",
-  #packages=["groups"],
+  packages=packages,
+  package_dir=package_dir,
+  ext_package="lie_learn",
   ext_modules=extensions,
   cmdclass = {'build_ext': build_ext},
 )
