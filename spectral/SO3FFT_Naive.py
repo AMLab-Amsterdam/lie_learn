@@ -279,6 +279,37 @@ def wigner_d_transform_analysis(f, wd):
         )
     return f_hat
 
+def wigner_d_transform_analysis_vectorized(f, wd):
+    assert f.shape[0] == f.shape[1]
+    assert f.shape[1] == f.shape[2]
+    assert f.shape[0] % 2 == 0
+
+    b = f.shape[0] // 2   # The bandwidth
+    f0 = f.shape[0] // 2  # The index of the 0-frequency / DC component
+
+    def _get_sub_matrix_idxs(l):
+        L = 2 * l + 1
+        n_cols = 2 * b
+        offset = b - l
+        tiles = np.tile(np.arange(L), L).reshape(L, L) + offset
+        row_offset = n_cols * (np.arange(L)[:,None]  + offset)
+        return tiles + row_offset
+
+    idxs = np.concatenate([ _get_sub_matrix_idxs(l).reshape(-1)
+                            for l in range(b) ])
+
+    F_flat = F.transpose([0,2,1]).reshape(-1,F.shape[1])[idxs]
+
+    tF_flat = (F_flat * wd_flat).sum(axis=1)
+
+    blocks = []
+    i = 0
+    for l in range(b):
+        L = 2*l+1
+        blocks.append(tF_flat[i:L**2].reshape(2*l+1, 2*l+1))
+        i += L
+
+    return blocks
 
 def wigner_d_transform_synthesis(f_hat, d):
     """
