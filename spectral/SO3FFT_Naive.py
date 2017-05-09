@@ -1,4 +1,6 @@
 
+from functools import lru_cache
+
 import numpy as np
 
 from lie_learn.representations.SO3.irrep_bases import change_of_basis_matrix
@@ -15,6 +17,7 @@ from scipy.fftpack import fft2, ifft2, fftshift
 # Write fast code for the real, quantum-normalized, centered / block-diagonal bases.
 # The real Wigner-d functions d^l_mn are identically 0 whenever either (m < 0 and n >= 0) or (m >= 0 and n < 0),
 #   so we can save work in the Wigner-d transform
+
 
 class SO3_FT_Naive(FFTBase):
     """
@@ -100,7 +103,7 @@ class SO3_FFT_SemiNaive_Complex(FFTBase):
         self.wd = weigh_wigner_d(self.d, self.w)
 
     def analyze(self, f):
-        return SO3_FFT_analyze(f, self.wd)
+        return SO3_FFT_analyze(f)  # , self.wd)
 
     def synthesize(self, f_hat):
         """
@@ -108,7 +111,7 @@ class SO3_FFT_SemiNaive_Complex(FFTBase):
 
         :param f_hat: a list of matrices of with shapes [1x1, 3x3, 5x5, ..., 2 L_max + 1 x 2 L_max + 1]
         """
-        return SO3_FFT_synthesize(f_hat, self.d)
+        return SO3_FFT_synthesize(f_hat)  # , self.d)
 
 
 class SO3_FFT_NaiveReal(FFTBase):
@@ -145,7 +148,7 @@ class SO3_FFT_NaiveReal(FFTBase):
         # Synthesize without using complex fft
 
 
-def SO3_FFT_analyze(f, wd):
+def SO3_FFT_analyze(f):
     """
     Compute the complex SO(3) Fourier transform of f.
 
@@ -196,29 +199,31 @@ def SO3_FFT_analyze(f, wd):
     F = fftshift(F, axes=(0, 2))
 
     # Then, perform the Wigner-d transform
-    return wigner_d_transform_analysis(F, wd)
+    return wigner_d_transform_analysis(F)
 
 
-def SO3_FFT_synthesize(f_hat, d):
+def SO3_FFT_synthesize(f_hat):
     """
     Perform the inverse (spectral to spatial) SO(3) Fourier transform.
 
     :param f_hat: a list of matrices of with shapes [1x1, 3x3, 5x5, ..., 2 L_max + 1 x 2 L_max + 1]
     """
-    F = wigner_d_transform_synthesis(f_hat, d)
+    F = wigner_d_transform_synthesis(f_hat)
 
     # The rest of the SO(3) FFT is just a standard torus FFT
     F = fftshift(F, axes=(0, 2))
     f = ifft2(F, axes=(0, 2))
 
-    b = len(d)
+    b = len(f_hat)
     return f * (2 * b) ** 2
 
 
-def SO3_ifft(f_hat, d):
+def SO3_ifft(f_hat):
     """
     """
-    b = len(d)
+    b = len(f_hat)
+    d = setup_d_transform(b)
+
     df_hat = [d[l] * f_hat[l][:, None, :] for l in range(len(d))]
 
     # Note: the frequencies where m=-B or n=-B are set to zero,
@@ -233,11 +238,11 @@ def SO3_ifft(f_hat, d):
     return f * 2 * (b ** 2) / np.pi
 
 
-def wigner_d_transform_analysis(f, wd):
+def wigner_d_transform_analysis(f):
     """
     The discrete Wigner-d transform [1] is defined as
 
-    WdT(s)[l, m, n] = sum_k=^{2b-1} w_b(k) d^l_mn(beta_k) s_k
+    WdT(s)[l, m, n] = sum_k=0^{2b-1} w_b(k) d^l_mn(beta_k) s_k
 
     where:
      - w_b(k) is the k-th quadrature weight for an order b grid,
@@ -245,7 +250,7 @@ def wigner_d_transform_analysis(f, wd):
      - beta_k = pi(2k + 1) / 4b
      - s is a data vector of length 2b
 
-    In practice we want to transform many data vectors at once; we have an input array of shape (
+    In practice we want to transform many data vectors at once; we have an input array of shape (2b, 2b, 2b)
 
     [1] SOFT: SO(3) Fourier Transforms
     Peter J. Kostelec and Daniel N. Rockmore
@@ -259,6 +264,8 @@ def wigner_d_transform_analysis(f, wd):
     assert f.shape[0] % 2 == 0
     b = f.shape[0] // 2   # The bandwidth
     f0 = f.shape[0] // 2  # The index of the 0-frequency / DC component
+
+    wd = weighted_d(b)
 
     f_hat = []  # To store the result
     Z = 2 * np.pi / ((2 * b) ** 2)  # Normalizing constant
@@ -282,51 +289,41 @@ def wigner_d_transform_analysis(f, wd):
     return f_hat
 
 
-def get_wigner_analysis_sub_block_indices(b, l):
-    """ computes the indices for the sub-block at order l
-    used in the wigner analysis """
-    L = 2 * l + 1
-    n_cols = 2 * b
-    offset = b - l
-    tiles = np.tile(np.arange(L), L).reshape(L, L) + offset
-    row_offset = n_cols * (np.arange(L)[:, None] + offset)
-    return tiles + row_offset
-
-
-def get_wigner_analysis_block_indices(b):
-    """ computes the flattened vector of all indices of the sub-blocks
-    up to order b, used in the wigner analyisis"""
-    return np.concatenate([get_wigner_analysis_sub_block_indices(b, l).reshape(-1)
-                           for l in range(b)])
-
-
-def get_flattened_weighted_ds(wd):
-    """ flattens the weighted d matrices into one vector """
-    return np.concatenate([m.transpose(0, 2, 1).reshape(-1, m.shape[1])
-                           for m in wd])
-
-
 def wigner_d_transform_analysis_vectorized(f, wd_flat, idxs):
     """ computes the wigner transform analysis in a vectorized way
     returns the flattened blocks of f_hat as a single vector
 
-    f: the so3 signal,
-    wd_flat: the flattened weighted wigner d functions
+    f: the input signal, shape (2b, 2b, 2b) axes m, beta, n.
+    wd_flat: the flattened weighted wigner d functions, shape (num_spectral, 2b), axes (l*m*n, beta)
     idxs: the array of indices containing all analysis blocks
     """
-    f_flat = f.transpose([0, 2, 1]).reshape(-1, f.shape[1])[idxs]
-    return (f_flat * wd_flat).sum(axis=1)
+    f_trans = f.transpose([0, 2, 1])                # shape 2b, 2b, 2b, axes m, n, beta
+    f_trans_flat = f_trans.reshape(-1, f.shape[1])  # shape 4b^2, 2b, axes m*n, beta
+    f_i = f_trans_flat[idxs]                        # shape num_spectral, 2b, axes l*m*n, beta
+    prod = f_i * wd_flat                            # shape num_spectral, 2b, axes l*m*n, beta
+    result = prod.sum(axis=1)                       # shape num_spectral, axes l*m*n
+    return result
 
 
-def wigner_d_transform_synthesis(f_hat, d):
+def wigner_d_transform_analysis_vectorized_v2(f, wd_flat_t, idxs):
     """
-    The discrete Wigner-d transform [1] is defined as
-
-    :param F:
-    :param wd:
-    :return:
+    
+    :param f: the SO(3) signal, shape (2b, 2b, 2b), axes beta, m, n
+    :param wd_flat: the flattened weighted wigner d functions, shape (2b, num_spectral), axes (beta, l*m*n)
+    :param idxs: 
+    :return: 
     """
-    b = len(d)  # bandwidth
+    fr = f.reshape(f.shape[0], -1)                 # shape 2b, 4b^2, axes beta, m*n
+    f_i = fr[..., idxs]                            # shape 2b, num_spectral, axes beta, l*m*n
+    prod = f_i * wd_flat_t                         # shape 2b, num_spectral, axes beta, l*m*n
+    result = prod.sum(axis=0)                      # shape num_spectral, axes l*m*n
+    return result
+
+
+def wigner_d_transform_synthesis(f_hat):
+
+    b = len(f_hat)
+    d = setup_d_transform(b, L2_normalized=False)
 
     # Perform the brute-force Wigner-d transform
     # Note: the frequencies where m=-B or n=-B are set to zero,
@@ -340,8 +337,10 @@ def wigner_d_transform_synthesis(f_hat, d):
     return F
 
 
-def wigner_d_transform_synthesis_vectorized(f_hat_flat, dv, inds):
-    b = dv.shape[0]  # bandwidth
+def wigner_d_transform_synthesis_vectorized(f_hat_flat, b):
+    dv = vectorized_d(b)
+    inds = zero_padding_inds(b)
+
     f_hat_vec = f_hat_flat[inds]
     f_hat_vec = f_hat_vec.reshape(b, 2 * b, 1, 2 * b)
     return np.einsum('lmbn,lmbn->mbn', f_hat_vec, dv)
@@ -366,6 +365,27 @@ def vectorize_d(d):
     return dv
 
 
+def weigh_wigner_d(d, w):
+    """
+    The Wigner-d transform involves a sum where each term is a product of data, d-function, and quadrature weight.
+     Since the d-functions and quadrature weights don't depend on the data, we can precompute their product.
+    We have a quadrature weight for each value of beta and beta corresponds to the second axis of d,
+    so the weights are broadcast over the other axes.
+
+    :param d: a list of samples of the Wigner-d function, as returned by setup_d_transform
+    :param w: an array of quadrature weights, as returned by S3.quadrature_weights
+    :return: the weighted d function samples, with the same shape as d
+    """
+    return [d[l] * w[None, :, None] for l in range(len(d))]
+
+
+@lru_cache(maxsize=32)
+def vectorized_d(b):
+    d = setup_d_transform(b, L2_normalized=False)
+    return vectorize_d(d)
+
+
+@lru_cache(maxsize=32)
 def zero_padding_inds(b):
     """
     To vectorize the Wigner-d transform, we have to take a list of matrices f_hat = [f_hat^0, ..., f_hat^L],
@@ -375,8 +395,8 @@ def zero_padding_inds(b):
 
     To implement the latter operation, we need indices. These are computed by this function.
 
-    :param f_hat:
-    :return:
+    :param b: bandwidth
+    :return: index array
     """
 
     inds = np.zeros(b * 2 * b * 2 * b, dtype=np.int)
@@ -387,6 +407,7 @@ def zero_padding_inds(b):
     return inds
 
 
+@lru_cache(maxsize=32)
 def setup_d_transform(b, L2_normalized,
                       field='complex', normalization='quantum', order='centered', condon_shortley='cs'):
     """
@@ -423,7 +444,7 @@ def setup_d_transform(b, L2_normalized,
     if L2_normalized:  # TODO: this should be integrated in the normalization spec above, no?
         # The Unitary matrix elements have norm:
         # | U^\lambda_mn |^2 = 1/(2l+1)
-        # where the 2-norm is defined in terms of normalized Haar measure. [Haar measure on SO(3) or SO(2)? SO3 probs]
+        # where the 2-norm is defined in terms of normalized Haar measure.
         # So T = sqrt(2l + 1) U are L2-normalized functions
         d = [d[l] * np.sqrt(2 * l + 1) for l in range(len(d))]
 
@@ -433,20 +454,37 @@ def setup_d_transform(b, L2_normalized,
     return d
 
 
-def weigh_wigner_d(d, w):
-    """
-    The Wigner-d transform involves a sum where each term is a product of data, d-function, and quadrature weight.
-     Since the d-functions and quadrature weights don't depend on the data, we can precompute their product.
-    We have a quadrature weight for each value of beta and beta corresponds to the second axis of d,
-    so the weights are broadcast over the other axes.
-
-    :param d: a list of samples of the Wigner-d function, as returned by setup_d_transform
-    :param w: an array of quadrature weights, as returned by S3.quadrature_weights
-    :return: the weighted d function samples, with the same shape as d
-    """
-    return [d[l] * w[None, :, None] for l in range(len(d))]
+@lru_cache(maxsize=32)
+def weighted_d(b):
+    d = setup_d_transform(b, L2_normalized=False)
+    w = S3.quadrature_weights(b, grid_type='SOFT')
+    return weigh_wigner_d(d, w)
 
 
+def get_wigner_analysis_sub_block_indices(b, l):
+    """ computes the indices for the sub-block at order l
+    used in the wigner analysis """
+    L = 2 * l + 1
+    n_cols = 2 * b
+    offset = b - l
+    tiles = np.tile(np.arange(L), L).reshape(L, L) + offset
+    row_offset = n_cols * (np.arange(L)[:, None] + offset)
+    return tiles + row_offset
+
+
+def get_wigner_analysis_block_indices(b):
+    """ computes the flattened vector of all indices of the sub-blocks
+    up to order b, used in the wigner analyisis"""
+    return np.concatenate([get_wigner_analysis_sub_block_indices(b, l).reshape(-1)
+                           for l in range(b)])
+
+
+def get_flattened_weighted_ds(wd):
+    """ flattens the weighted d matrices into one vector """
+    return np.concatenate([m.transpose(0, 2, 1).reshape(-1, m.shape[1]) for m in wd])
+
+
+# TODO update these
 def SO3_convolve(f, g, dw=None, d=None):
 
     assert f.shape == g.shape

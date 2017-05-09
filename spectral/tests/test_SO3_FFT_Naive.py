@@ -19,6 +19,8 @@ def test_SO3_FFT_SemiNaiveComplex():
 
     f_hat = [np.zeros((2 * ll + 1, 2 * ll + 1)) for ll in range(L_max + 1)]
 
+    # TODO: the SO3_FFT_SemiNaive_Complex no longer uses the D convention parameters because of new caching feature
+
     field = 'complex'
     order = 'centered'
     for normalization in ('quantum', 'seismology'):  # Note: the geodesy and nfft wigners are normalized differently
