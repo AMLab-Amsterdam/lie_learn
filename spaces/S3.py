@@ -141,7 +141,7 @@ def integrate_quad(f, grid_type, normalize=True, w=None):
         if w is None:
             w = quadrature_weights(b, grid_type)
 
-        integral = np.sum(f * w[None, :, None] / (2. * (2 * b) ** 2))
+        integral = np.sum(f * w[None, :, None])
     else:
         raise NotImplementedError('Unsupported grid_type:', grid_type)
 
@@ -183,6 +183,10 @@ def quadrature_weights(b, grid_type='SOFT'):
                               * np.sin((2 * j + 1) * (2 * k + 1)
                                        * np.pi / (4. * b))))
                       for j in range(2 * b)])
+
+        # This is not in the SOFT documentation, but we found that it is necessary to divide by this factor to
+        # get correct results.
+        w /= 2. * ((2 * b) ** 2)
 
         # In the SOFT source, they talk about the following weights being used for
         # odd-order transforms. Do not understand this, and the weights used above

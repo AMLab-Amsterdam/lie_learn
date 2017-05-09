@@ -7,7 +7,7 @@ from lie_learn.representations.SO3.wigner_d import wigner_D_function
 def test_S3_quadint_equals_numint():
     """Test if SO(3) quadrature integration gives the same result as scipy numerical integration"""
     b = 10
-    for l in range(b):
+    for l in range(2):
         for m in range(-l, l + 1):
             for n in range(-l, l + 1):
                 check_S3_quadint_equals_numint(l, m, n, b)
