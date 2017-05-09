@@ -59,7 +59,7 @@ def block_sh_ph(L_max, theta, phi):
     """
 
     from .pinchon_hoggan.pinchon_hoggan import apply_rotation_block, make_c2b
-    from irrep_bases import change_of_basis_function
+    from .irrep_bases import change_of_basis_function
 
     irreps = np.arange(L_max + 1)
 
