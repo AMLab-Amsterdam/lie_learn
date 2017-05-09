@@ -134,7 +134,6 @@ def wigner_D_norm(l, normalized_haar=True):
     where dg is a Haar measure.
 
     :param l: for some normalization conventions, the norm of a Wigner-D function D^l_mn depends on the degree l
-    :param normalization: normalization convention for the Wigner-D function
     :param normalized_haar: whether to use the Haar measure da db sinb dc or the normalized Haar measure
      da db sinb dc / 8pi^2
     :return: the squared norm of the spherical harmonic with respect to given measure

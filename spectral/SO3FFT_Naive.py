@@ -23,12 +23,25 @@ class SO3_FT_Naive(FFTBase):
     """
     The most naive implementation of the discrete SO(3) Fourier transform:
     explicitly construct the Fourier matrix F and multiply by it to perform the Fourier transform.
+    
+    We use the following convention:
+    Let D^l_mn(g) (the Wigner D function) be normalized so that it is unitary.
+    FFT(f)^l_mn = int_SO(3) f(g) \conj(D^l_mn(g)) dg
+    where dg is the normalized Haar measure on SO(3).
+    
+    IFFT(\hat(f))(g) = \sum_{l=0}^L_max (2l + 1) \sum_{m=-l}^l \sum_{n=-l}^l \hat(f)^l_mn D^l_mn(g)
+    
+    Under this convention, where (2l+1) appears in the IFFT, we have:
+    - The Fourier transform of D^l_mn is a one-hot vector where FFT(D^l_mn)^l_mn = 1 / (2l + 1),
+      because 1 / (2l + 1) is the squared norm of D^l_mn.
+    - The convolution theorem is
+      FFT(f * psi) = FFT(f) FFT(psi)^{*T},
+      i.e. the second argument is conjugate-transposed, and there is no normalization constant required.
     """
 
     def __init__(self, L_max, field='complex', normalization='quantum', order='centered', condon_shortley='cs'):
 
         super().__init__()
-
         # TODO allow user to specify the grid (now using SOFT implicitly)
 
         # Explicitly construct the Wigner-D matrices evaluated at each point in a grid in SO(3)
@@ -48,15 +61,21 @@ class SO3_FT_Naive(FFTBase):
                                                                       field, normalization, order, condon_shortley)
 
         # Compute quadrature weights
-        self.w = S3.quadrature_weights(b=b)
+        self.w = S3.quadrature_weights(b=b, grid_type='SOFT')
 
-        # Convert D to a matrix that performs the FFT synthesis
+        # Stack D into a single Fourier matrix
         # The first axis corresponds to the spatial samples.
-        # The spatial grid has shape (2b, 2b, 2b), so this axis has length (2b)^3
+        # The spatial grid has shape (2b, 2b, 2b), so this axis has length (2b)^3.
         # The second axis of this matrix has length sum_{l=0}^L_max (2l+1)^2,
         # which corresponds to all the spectral coefficients flattened into a vector.
         # (normally these are stored as matrices D^l of shape (2l+1)x(2l+1))
         self.F = np.hstack([self.D[l].reshape((2 * b) ** 3, (2 * l + 1) ** 2) for l in range(b)])
+
+        # For the IFFT / synthesis transform, we need to weight the order-l Fourier coefficients by (2l + 1)
+        # Here we precompute these coefficients.
+        ls = [[ls] * (2 * ls + 1) ** 2 for ls in range(b)]
+        ls = np.array([ll for sublist in ls for ll in sublist])  # (0,) + 9 * (1,) + 25 * (2,), ...
+        self.l_weights = 2 * ls + 1
 
     def analyze(self, f):
         f_hat = []
@@ -73,11 +92,11 @@ class SO3_FT_Naive(FFTBase):
         b = len(self.D)
         f = np.zeros((2 * b, 2 * b, 2 * b), dtype=self.D[0].dtype)
         for l in range(b):
-            f += np.einsum('ijkmn,mn->ijk', self.D[l], f_hat[l])
+            f += np.einsum('ijkmn,mn->ijk', self.D[l], f_hat[l] * (2 * l + 1))
         return f
 
     def synthesize_by_matmul(self, f_hat):
-        return self.F.dot(f_hat)
+        return self.F.dot(f_hat * self.l_weights)
 
 
 class SO3_FFT_SemiNaive_Complex(FFTBase):
