@@ -31,7 +31,7 @@ def check_orthogonality(L_max=3, grid_type='Gauss-Legendre',
 
 
 def test_orthogonality():
-    L_max = 4
+    L_max = 2
     grid_type = 'Gauss-Legendre'
 
     for field in ('real', 'complex'):
