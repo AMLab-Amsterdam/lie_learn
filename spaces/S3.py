@@ -1,3 +1,4 @@
+from functools import lru_cache
 
 import numpy as np
 import lie_learn.spaces.S2 as S2
@@ -83,13 +84,13 @@ def linspace(b, grid_type='SOFT'):
     # According to this paper:
     # "Sampling sets and quadrature formulae on the rotation group"
     # We can just tack a sampling grid for S^1 to a sampling grid for S^2 to get a sampling grid for SO(3).
-    gamma = 2 * np.pi * np.arange(2 * b)
+    gamma = 2 * np.pi * np.arange(2 * b) / (2. * b)
 
     return alpha, beta, gamma
 
 
 def meshgrid(b, grid_type='SOFT'):
-    return np.meshgrid(*linspace(b, grid_type))
+    return np.meshgrid(*linspace(b, grid_type), indexing='ij')
 
 
 def integrate(f, normalize=True):
@@ -150,6 +151,7 @@ def integrate_quad(f, grid_type, normalize=True, w=None):
         return integral * 8 * np.pi ** 2
 
 
+@lru_cache(maxsize=32)
 def quadrature_weights(b, grid_type='SOFT'):
     """
     Compute quadrature weights for the grid used by Kostelec & Rockmore [1, 2].
