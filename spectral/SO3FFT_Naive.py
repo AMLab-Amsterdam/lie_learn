@@ -493,9 +493,32 @@ def get_wigner_analysis_sub_block_indices(b, l):
 
 def get_wigner_analysis_block_indices(b):
     """ computes the flattened vector of all indices of the sub-blocks
-    up to order b, used in the wigner analyisis"""
+    up to order b, used in the wigner analysis"""
     return np.concatenate([get_wigner_analysis_sub_block_indices(b, l).reshape(-1)
                            for l in range(b)])
+
+
+def get_wigner_analysis_indices(b):
+    def mn_ind_fftshift(m, n):
+        m_zero_based = m + b
+        n_zero_based = n + b
+        array_height = 2 * b
+        return m_zero_based * array_height + n_zero_based
+
+    def mn_ind(m, n):
+        m_zero_based = m % (2 * b)
+        n_zero_based = n % (2 * b)
+        array_height = 2 * b
+        return m_zero_based * array_height + n_zero_based
+
+    num_spectral_coefficients = np.sum([(2 * l + 1) ** 2 for l in range(b)])
+    inds = np.empty(num_spectral_coefficients, dtype=int)
+    for l in range(b):
+        for m in range(-l, l + 1):
+            for n in range(-l, l + 1):
+                inds[flat_ind_so3(l, m, n)] = mn_ind(m, n)
+
+    return inds
 
 
 def get_flattened_weighted_ds(wd):
