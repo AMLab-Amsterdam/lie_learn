@@ -4,15 +4,17 @@ This code was developed using an extremely agile, move-fast-and-break-things, ex
 
 # What this code can do
 - Reparamterize rotations, e.g. matrix to Euler angles to quaternions, etc. (see groups & spaces modules)
-- Compute the Wigner-d and Wigner-D matrices (the irreducible representations of SO(3)), and spherical harmonics, using the method developed by Pinchon & Hoggan [1] (see pinchon_hoggan_dense.py). This is a very fast and stable method, but requires a fairly large "J matrix", which we have precomputed up to order 278 using a Maple script. The code will automatically download it from Google Drive when it's needed and not yet downloaded.
+- Compute the Wigner-d and Wigner-D matrices (the irreducible representations of SO(3)), and spherical harmonics, using the method developed by Pinchon & Hoggan [1] (see pinchon_hoggan_dense.py). This is a very fast and stable method, but requires a fairly large "J matrix", which we have precomputed up to order 278 using a Maple script. The code will automatically download it from Google Drive during installation.
 Note: There are many normalization and phase conventions for both the real and complex versions of the D-matrices and spherical harmonics, and the code can convert between a lot of them (irrep_bases.pyx).
 - Compute generalized / non-commutative FFTs for the sphere S2, rotation group SO3, and special Euclidean group SE2 (see spectral module).
 - Fit Harmonic Exponential Families on the sphere (probability module; not sure code is still working)
 
-# Cython modules
-Some code is written in Cython for speed. To install, run:
+# Installation
+To install, run:
 
 $ setup.py install --user
+
+This should download the J matrices and compile Cython modules. 
 
 # References
 [1] Pinchon, D., & Hoggan, P. E. (2007). Rotation matrices for real spherical harmonics: general rotations of atomic orbitals in space-fixed axes. Journal of Physics A: Mathematical and Theoretical, 40(7), 1597–1610.
