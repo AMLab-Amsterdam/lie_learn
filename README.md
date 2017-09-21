@@ -16,6 +16,10 @@ $ python setup.py install
 
 This should download the J matrices and compile Cython modules. 
 
+# Feedback
+For questions and comments, feel free to contact Taco Cohen (http://ta.co.nl).
+
+
 # References
 [1] Pinchon, D., & Hoggan, P. E. (2007). Rotation matrices for real spherical harmonics: general rotations of atomic orbitals in space-fixed axes. Journal of Physics A: Mathematical and Theoretical, 40(7), 1597–1610.
 
