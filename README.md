@@ -12,7 +12,7 @@ Note: There are many normalization and phase conventions for both the real and c
 # Installation
 To install, run:
 
-$ setup.py install --user
+$ python setup.py install
 
 This should download the J matrices and compile Cython modules. 
 
