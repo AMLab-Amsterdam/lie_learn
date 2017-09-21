@@ -1,78 +1,65 @@
-# Usage:
-# python setup.py build_ext --inplace
-
-# build script for 'dvedit' - Python libdv wrapper
-
-# change this as needed
-#libdvIncludeDir = "/usr/include/libdv"
-
-import glob, sys, os, stat, subprocess
-from distutils.core import setup
-from distutils.extension import Extension
-import numpy as np
-
-# we'd better have Cython installed, or it's a no-go
-try:
-    from Cython.Distutils import build_ext
-except:
-    print("You don't seem to have Cython installed. Please get a")
-    print("copy from www.cython.org and install it")
-    sys.exit(1)
+#pylint: disable=C
+from setuptools import setup, find_packages
+import setuptools.command.install
+from Cython.Build import cythonize
+import requests
+import os
 
 
-# scan the 'dvedit' directory for extension files, converting
-# them to extension names in dotted notation
-def scandir(dir="./", files=[]):
-    for file in os.listdir(dir):
-        path = os.path.join(dir, file)
-        if os.path.isfile(path) and path.endswith(".pyx"):
-            # Exclude './' and '.pyx' and replace slashes with dots to get package name
-            files.append(path.replace(os.path.sep, ".")[2:-4])
-        elif os.path.isdir(path):
-            scandir(path, files)
-    return files
+# code to download from google Drive
+# copy from https://stackoverflow.com/questions/38511444/python-download-files-from-google-drive-using-url
+def download_file_from_google_drive(file_id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+
+    session = requests.Session()
+
+    response = session.get(URL, params = { 'id' : file_id }, stream = True)
+    token = get_confirm_token(response)
+
+    if token:
+        params = { 'id' : file_id, 'confirm' : token }
+        response = session.get(URL, params = params, stream = True)
+
+    save_response_content(response, destination)
+
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+
+    return None
+
+def save_response_content(response, destination):
+    CHUNK_SIZE = 32768
+
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk: # filter out keep-alive new chunks
+                f.write(chunk)
+# end of the copied code
 
 
-# generate an Extension object from its dotted name
-def makeExtension(extName):
-    extPath = extName.replace(".", os.path.sep) + ".pyx"
-    return Extension(
-        extName,
-        [extPath],
-        include_dirs = [np.get_include(), "."],   # adding the '.' to include_dirs is CRUCIAL!!
-        extra_compile_args = ["-O3", "-Wall"],
-        extra_link_args = ['-g'],
-        libraries = [],
-        )
+class PostInstallCommand(setuptools.command.install.install):
+    """Post-installation for installation mode."""
 
-def find_packages(root=".", excluded=[], prefix=""):
-    packages = []
-    package_dir = {}
-    for p in glob.glob('{0}/**/__init__.py'.format(root), recursive=True):
-        ps = p.split(os.path.sep)
-        if not any([ p.startswith(q) for q in excluded ]):
-            newp = ".".join([prefix] + ps[1:-1])
-            packages.append(newp)
-            package_dir[newp] = os.path.join(*ps[:-1])
-    return packages, package_dir
+    def run(self):
+        setuptools.command.install.install.run(self)
 
-# get the list of extensions
-extNames = scandir("./")
-print(extNames)
+        google_drive_file_id = '0B5e7DAOiLEZwSkdfXzBYT29Nc3c'
+        destination = os.path.join(self.install_lib, 'lie_learn/representations/SO3/pinchon_hoggan/J_dense_0-278.npy')
 
-# and build up the set of Extension objects
-extensions = [makeExtension(name) for name in extNames]
-print(extensions)
+        print("Start to download file ID {} for google drive into {}".format(google_drive_file_id, destination))
 
-packages, package_dir = find_packages(excluded=["./build"], prefix="lie_learn")
-print(packages, package_dir)
+        try:
+            download_file_from_google_drive(google_drive_file_id, destination)
+        except:
+            print("Error during the download")
+            raise
 
-# finally, we can pass all this to distutils
+
 setup(
-  name="lie_learn",
-  packages=packages,
-  package_dir=package_dir,
-  ext_package="lie_learn",
-  ext_modules=extensions,
-  cmdclass = {'build_ext': build_ext},
+    name='lie_learn',
+    packages=find_packages(),
+    ext_modules=cythonize('lie_learn/**/*.pyx'),
+    cmdclass={ 'install': PostInstallCommand },
 )
