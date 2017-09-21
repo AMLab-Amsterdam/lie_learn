@@ -11,7 +11,8 @@ Note: There are many normalization and phase conventions for both the real and c
 
 # Cython modules
 Some code is written in Cython for speed. To install, run:
-python setup.py build_ext --inplace
+
+$ setup.py install --user
 
 # References
 [1] Pinchon, D., & Hoggan, P. E. (2007). Rotation matrices for real spherical harmonics: general rotations of atomic orbitals in space-fixed axes. Journal of Physics A: Mathematical and Theoretical, 40(7), 1597–1610.
