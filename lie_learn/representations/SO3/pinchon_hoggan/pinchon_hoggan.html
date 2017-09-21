@@ -335,8 +335,10 @@ body.cython { font-family: courier; font-size: 12; }
 .cython .mh { color: #666666 } /* Literal.Number.Hex */
 .cython .mi { color: #666666 } /* Literal.Number.Integer */
 .cython .mo { color: #666666 } /* Literal.Number.Oct */
+.cython .sa { color: #BA2121 } /* Literal.String.Affix */
 .cython .sb { color: #BA2121 } /* Literal.String.Backtick */
 .cython .sc { color: #BA2121 } /* Literal.String.Char */
+.cython .dl { color: #BA2121 } /* Literal.String.Delimiter */
 .cython .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
 .cython .s2 { color: #BA2121 } /* Literal.String.Double */
 .cython .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
@@ -347,9 +349,11 @@ body.cython { font-family: courier; font-size: 12; }
 .cython .s1 { color: #BA2121 } /* Literal.String.Single */
 .cython .ss { color: #19177C } /* Literal.String.Symbol */
 .cython .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.cython .fm { color: #0000FF } /* Name.Function.Magic */
 .cython .vc { color: #19177C } /* Name.Variable.Class */
 .cython .vg { color: #19177C } /* Name.Variable.Global */
 .cython .vi { color: #19177C } /* Name.Variable.Instance */
+.cython .vm { color: #19177C } /* Name.Variable.Magic */
 .cython .il { color: #666666 } /* Literal.Number.Integer.Long */
     </style>
     <script>
@@ -418,7 +422,7 @@ body.cython { font-family: courier; font-size: 12; }
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_FLOAT_TYPE, __pyx_t_1) &lt; 0) __PYX_ERR(0, 22, __pyx_L1_error)
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
 </pre><pre class="cython line score-0" onclick='toggleDiv(this)'>+<span class="">023</span>: <span class="k">ctypedef</span> <span class="n">np</span><span class="o">.</span><span class="n">float64_t</span> <span class="n">FLOAT_TYPE_t</span></pre>
-<pre class='cython code score-0 '>typedef __pyx_t_5numpy_float64_t __pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t;
+<pre class='cython code score-0 '>typedef __pyx_t_5numpy_float64_t __pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t;
 </pre><pre class="cython line score-11" onclick='toggleDiv(this)'>+<span class="">024</span>: <span class="n">INT_TYPE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span></pre>
 <pre class='cython code score-11 '>  __pyx_t_1 = <span class='pyx_c_api'>__Pyx_GetModuleGlobalName</span>(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 24, __pyx_L1_error)
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
@@ -432,9 +436,9 @@ body.cython { font-family: courier; font-size: 12; }
 <pre class="cython line score-0">&#xA0;<span class="">027</span>: </pre>
 <pre class="cython line score-102" onclick='toggleDiv(this)'>+<span class="">028</span>: <span class="k">def</span> <span class="nf">apply_rotation_block</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">irreps</span><span class="p">,</span> <span class="n">c2b</span><span class="p">,</span> <span class="n">J_block</span><span class="p">,</span> <span class="n">l_max</span><span class="p">,</span> <span class="n">X_out</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></pre>
 <pre class='cython code score-102 '>/* Python wrapper */
-static PyObject *__pyx_pw_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_1apply_rotation_block(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_1apply_rotation_block = {"apply_rotation_block", (PyCFunction)__pyx_pw_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_1apply_rotation_block, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_1apply_rotation_block(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_1apply_rotation_block(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_1apply_rotation_block = {"apply_rotation_block", (PyCFunction)__pyx_pw_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_1apply_rotation_block, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_1apply_rotation_block(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_g = 0;
   PyObject *__pyx_v_X = 0;
   PyObject *__pyx_v_irreps = 0;
@@ -527,18 +531,18 @@ static PyObject *__pyx_pw_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   __pyx_L5_argtuple_error:;
   <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("apply_rotation_block", 0, 6, 7, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); __PYX_ERR(0, 28, __pyx_L3_error)
   __pyx_L3_error:;
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("representations.SO3.pinchon_hoggan.pinchon_hoggan.apply_rotation_block", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("lie_learn.representations.SO3.pinchon_hoggan.pinchon_hoggan.apply_rotation_block", __pyx_clineno, __pyx_lineno, __pyx_filename);
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_rotation_block(__pyx_self, __pyx_v_g, __pyx_v_X, __pyx_v_irreps, __pyx_v_c2b, __pyx_v_J_block, __pyx_v_l_max, __pyx_v_X_out);
+  __pyx_r = __pyx_pf_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_rotation_block(__pyx_self, __pyx_v_g, __pyx_v_X, __pyx_v_irreps, __pyx_v_c2b, __pyx_v_J_block, __pyx_v_l_max, __pyx_v_X_out);
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_rotation_block(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_g, PyObject *__pyx_v_X, PyObject *__pyx_v_irreps, PyObject *__pyx_v_c2b, PyObject *__pyx_v_J_block, PyObject *__pyx_v_l_max, PyObject *__pyx_v_X_out) {
+static PyObject *__pyx_pf_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_rotation_block(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_g, PyObject *__pyx_v_X, PyObject *__pyx_v_irreps, PyObject *__pyx_v_c2b, PyObject *__pyx_v_J_block, PyObject *__pyx_v_l_max, PyObject *__pyx_v_X_out) {
   PyObject *__pyx_v_out_shape = NULL;
   PyObject *__pyx_v_X_temp = NULL;
   PyObject *__pyx_r = NULL;
@@ -556,7 +560,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_4);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_5);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_8);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("representations.SO3.pinchon_hoggan.pinchon_hoggan.apply_rotation_block", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("lie_learn.representations.SO3.pinchon_hoggan.pinchon_hoggan.apply_rotation_block", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_v_out_shape);
@@ -573,11 +577,11 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_tuple__32);
   <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_tuple__32);
 /* … */
-  __pyx_t_2 = PyCFunction_NewEx(&amp;__pyx_mdef_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_1apply_rotation_block, NULL, __pyx_n_s_representations_SO3_pinchon_hogg); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&amp;__pyx_mdef_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_1apply_rotation_block, NULL, __pyx_n_s_lie_learn_representations_SO3_pi); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 28, __pyx_L1_error)
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_apply_rotation_block, __pyx_t_2) &lt; 0) __PYX_ERR(0, 28, __pyx_L1_error)
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_codeobj__33 = (PyObject*)<span class='pyx_c_api'>__Pyx_PyCode_New</span>(7, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_jonas_Documents_code_rese, __pyx_n_s_apply_rotation_block, 28, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_codeobj__33 = (PyObject*)<span class='pyx_c_api'>__Pyx_PyCode_New</span>(7, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_mario_Documents_amlab_lie, __pyx_n_s_apply_rotation_block, 28, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(0, 28, __pyx_L1_error)
 </pre><pre class="cython line score-0">&#xA0;<span class="">029</span>: </pre>
 <pre class="cython line score-99" onclick='toggleDiv(this)'>+<span class="">030</span>:     <span class="n">X</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="n">generalized_broadcast</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">g</span><span class="p">])</span></pre>
 <pre class='cython code score-99 '>  __pyx_t_2 = <span class='pyx_c_api'>__Pyx_GetModuleGlobalName</span>(__pyx_n_s_generalized_broadcast); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
@@ -1031,7 +1035,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   if (!(likely(((__pyx_v_c2b) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_v_c2b, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 40, __pyx_L1_error)
   __pyx_t_7 = <span class='pyx_c_api'>__Pyx_PyInt_As_int</span>(__pyx_v_l_max); if (unlikely((__pyx_t_7 == (int)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) __PYX_ERR(0, 40, __pyx_L1_error)
   if (!(likely(((__pyx_v_X_out) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_v_X_out, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 40, __pyx_L1_error)
-  __pyx_t_4 = __pyx_f_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_z_rotation_block(((PyArrayObject *)__pyx_t_1), ((PyArrayObject *)__pyx_v_X), ((PyArrayObject *)__pyx_v_irreps), ((PyArrayObject *)__pyx_v_c2b), __pyx_t_7, ((PyArrayObject *)__pyx_v_X_out)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_z_rotation_block(((PyArrayObject *)__pyx_t_1), ((PyArrayObject *)__pyx_v_X), ((PyArrayObject *)__pyx_v_irreps), ((PyArrayObject *)__pyx_v_c2b), __pyx_t_7, ((PyArrayObject *)__pyx_v_X_out)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 40, __pyx_L1_error)
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_4); __pyx_t_4 = 0;
@@ -1042,7 +1046,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
 <pre class='cython code score-15 '>  if (!(likely(((__pyx_v_X_out) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_v_X_out, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 41, __pyx_L1_error)
   if (!(likely(<span class='py_c_api'>PyList_CheckExact</span>(__pyx_v_J_block))||((__pyx_v_J_block) == Py_None)||(<span class='py_c_api'>PyErr_Format</span>(PyExc_TypeError, "Expected %.16s, got %.200s", "list", Py_TYPE(__pyx_v_J_block)-&gt;tp_name), 0))) __PYX_ERR(0, 41, __pyx_L1_error)
   if (!(likely(((__pyx_v_X_temp) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_v_X_temp, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 41, __pyx_L1_error)
-  __pyx_t_4 = __pyx_f_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_J_block(((PyArrayObject *)__pyx_v_X_out), ((PyObject*)__pyx_v_J_block), ((PyArrayObject *)__pyx_v_X_temp)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_J_block(((PyArrayObject *)__pyx_v_X_out), ((PyObject*)__pyx_v_J_block), ((PyArrayObject *)__pyx_v_X_temp)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 41, __pyx_L1_error)
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_4); __pyx_t_4 = 0;
 </pre><pre class="cython line score-34" onclick='toggleDiv(this)'>+<span class="">042</span>:     <span class="n">apply_z_rotation_block</span><span class="p">(</span><span class="n">g</span><span class="p">[:,</span> <span class="mf">1</span><span class="p">],</span> <span class="n">X_temp</span><span class="p">,</span> <span class="n">irreps</span><span class="p">,</span> <span class="n">c2b</span><span class="p">,</span> <span class="n">l_max</span><span class="p">,</span> <span class="n">X_out</span><span class="o">=</span><span class="n">X_out</span><span class="p">)</span></pre>
@@ -1058,7 +1062,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   if (!(likely(((__pyx_v_c2b) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_v_c2b, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 42, __pyx_L1_error)
   __pyx_t_7 = <span class='pyx_c_api'>__Pyx_PyInt_As_int</span>(__pyx_v_l_max); if (unlikely((__pyx_t_7 == (int)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) __PYX_ERR(0, 42, __pyx_L1_error)
   if (!(likely(((__pyx_v_X_out) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_v_X_out, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 42, __pyx_L1_error)
-  __pyx_t_1 = __pyx_f_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_z_rotation_block(((PyArrayObject *)__pyx_t_4), ((PyArrayObject *)__pyx_v_X_temp), ((PyArrayObject *)__pyx_v_irreps), ((PyArrayObject *)__pyx_v_c2b), __pyx_t_7, ((PyArrayObject *)__pyx_v_X_out)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_z_rotation_block(((PyArrayObject *)__pyx_t_4), ((PyArrayObject *)__pyx_v_X_temp), ((PyArrayObject *)__pyx_v_irreps), ((PyArrayObject *)__pyx_v_c2b), __pyx_t_7, ((PyArrayObject *)__pyx_v_X_out)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_4); __pyx_t_4 = 0;
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
@@ -1069,7 +1073,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
 <pre class='cython code score-15 '>  if (!(likely(((__pyx_v_X_out) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_v_X_out, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 43, __pyx_L1_error)
   if (!(likely(<span class='py_c_api'>PyList_CheckExact</span>(__pyx_v_J_block))||((__pyx_v_J_block) == Py_None)||(<span class='py_c_api'>PyErr_Format</span>(PyExc_TypeError, "Expected %.16s, got %.200s", "list", Py_TYPE(__pyx_v_J_block)-&gt;tp_name), 0))) __PYX_ERR(0, 43, __pyx_L1_error)
   if (!(likely(((__pyx_v_X_temp) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_v_X_temp, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 43, __pyx_L1_error)
-  __pyx_t_1 = __pyx_f_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_J_block(((PyArrayObject *)__pyx_v_X_out), ((PyObject*)__pyx_v_J_block), ((PyArrayObject *)__pyx_v_X_temp)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_J_block(((PyArrayObject *)__pyx_v_X_out), ((PyObject*)__pyx_v_J_block), ((PyArrayObject *)__pyx_v_X_temp)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
 </pre><pre class="cython line score-34" onclick='toggleDiv(this)'>+<span class="">044</span>:     <span class="n">apply_z_rotation_block</span><span class="p">(</span><span class="n">g</span><span class="p">[:,</span> <span class="mf">0</span><span class="p">],</span> <span class="n">X_temp</span><span class="p">,</span> <span class="n">irreps</span><span class="p">,</span> <span class="n">c2b</span><span class="p">,</span> <span class="n">l_max</span><span class="p">,</span> <span class="n">X_out</span><span class="o">=</span><span class="n">X_out</span><span class="p">)</span></pre>
@@ -1085,7 +1089,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   if (!(likely(((__pyx_v_c2b) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_v_c2b, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 44, __pyx_L1_error)
   __pyx_t_7 = <span class='pyx_c_api'>__Pyx_PyInt_As_int</span>(__pyx_v_l_max); if (unlikely((__pyx_t_7 == (int)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) __PYX_ERR(0, 44, __pyx_L1_error)
   if (!(likely(((__pyx_v_X_out) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_v_X_out, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 44, __pyx_L1_error)
-  __pyx_t_4 = __pyx_f_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_z_rotation_block(((PyArrayObject *)__pyx_t_1), ((PyArrayObject *)__pyx_v_X_temp), ((PyArrayObject *)__pyx_v_irreps), ((PyArrayObject *)__pyx_v_c2b), __pyx_t_7, ((PyArrayObject *)__pyx_v_X_out)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_z_rotation_block(((PyArrayObject *)__pyx_t_1), ((PyArrayObject *)__pyx_v_X_temp), ((PyArrayObject *)__pyx_v_irreps), ((PyArrayObject *)__pyx_v_c2b), __pyx_t_7, ((PyArrayObject *)__pyx_v_X_out)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 44, __pyx_L1_error)
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_4); __pyx_t_4 = 0;
@@ -1149,7 +1153,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
 <pre class="cython line score-0">&#xA0;<span class="">050</span>: <span class="nd">@cython</span><span class="o">.</span><span class="n">nonecheck</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">051</span>: <span class="nd">@cython</span><span class="o">.</span><span class="n">boundscheck</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></pre>
 <pre class="cython line score-54" onclick='toggleDiv(this)'>+<span class="">052</span>: <span class="k">cdef</span> <span class="nf">apply_z_rotation_block</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">FLOAT_TYPE_t</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="mf">1</span><span class="p">]</span> <span class="n">angles</span><span class="p">,</span></pre>
-<pre class='cython code score-54 '>static PyObject *__pyx_f_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_z_rotation_block(PyArrayObject *__pyx_v_angles, PyArrayObject *__pyx_v_X, PyArrayObject *__pyx_v_irreps, PyArrayObject *__pyx_v_c2b, int __pyx_v_l_max, PyArrayObject *__pyx_v_X_out) {
+<pre class='cython code score-54 '>static PyObject *__pyx_f_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_z_rotation_block(PyArrayObject *__pyx_v_angles, PyArrayObject *__pyx_v_X, PyArrayObject *__pyx_v_irreps, PyArrayObject *__pyx_v_c2b, int __pyx_v_l_max, PyArrayObject *__pyx_v_X_out) {
   int __pyx_v_irrep_ind;
   int __pyx_v_irrep;
   int __pyx_v_center;
@@ -1211,27 +1215,27 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   __pyx_pybuffernd_X_out.rcbuffer = &amp;__pyx_pybuffer_X_out;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_angles.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_angles, &amp;__Pyx_TypeInfo_nn___pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_angles.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_angles, &amp;__Pyx_TypeInfo_nn___pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
   }
   __pyx_pybuffernd_angles.diminfo[0].strides = __pyx_pybuffernd_angles.rcbuffer-&gt;pybuffer.strides[0]; __pyx_pybuffernd_angles.diminfo[0].shape = __pyx_pybuffernd_angles.rcbuffer-&gt;pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_X.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_X, &amp;__Pyx_TypeInfo_nn___pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_X.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_X, &amp;__Pyx_TypeInfo_nn___pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
   }
   __pyx_pybuffernd_X.diminfo[0].strides = __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.strides[0]; __pyx_pybuffernd_X.diminfo[0].shape = __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.shape[0]; __pyx_pybuffernd_X.diminfo[1].strides = __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.strides[1]; __pyx_pybuffernd_X.diminfo[1].shape = __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_irreps.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_irreps, &amp;__Pyx_TypeInfo_nn___pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_irreps.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_irreps, &amp;__Pyx_TypeInfo_nn___pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
   }
   __pyx_pybuffernd_irreps.diminfo[0].strides = __pyx_pybuffernd_irreps.rcbuffer-&gt;pybuffer.strides[0]; __pyx_pybuffernd_irreps.diminfo[0].shape = __pyx_pybuffernd_irreps.rcbuffer-&gt;pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_c2b.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_c2b, &amp;__Pyx_TypeInfo_nn___pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_c2b.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_c2b, &amp;__Pyx_TypeInfo_nn___pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
   }
   __pyx_pybuffernd_c2b.diminfo[0].strides = __pyx_pybuffernd_c2b.rcbuffer-&gt;pybuffer.strides[0]; __pyx_pybuffernd_c2b.diminfo[0].shape = __pyx_pybuffernd_c2b.rcbuffer-&gt;pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_X_out, &amp;__Pyx_TypeInfo_nn___pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_X_out, &amp;__Pyx_TypeInfo_nn___pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
   }
   __pyx_pybuffernd_X_out.diminfo[0].strides = __pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer.strides[0]; __pyx_pybuffernd_X_out.diminfo[0].shape = __pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer.shape[0]; __pyx_pybuffernd_X_out.diminfo[1].strides = __pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer.strides[1]; __pyx_pybuffernd_X_out.diminfo[1].shape = __pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer.shape[1];
 /* … */
@@ -1257,7 +1261,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
     <span class='pyx_c_api'>__Pyx_SafeReleaseBuffer</span>(&amp;__pyx_pybuffernd_c2b.rcbuffer-&gt;pybuffer);
     <span class='pyx_c_api'>__Pyx_SafeReleaseBuffer</span>(&amp;__pyx_pybuffernd_irreps.rcbuffer-&gt;pybuffer);
   <span class='pyx_c_api'>__Pyx_ErrRestore</span>(__pyx_type, __pyx_value, __pyx_tb);}
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("representations.SO3.pinchon_hoggan.pinchon_hoggan.apply_z_rotation_block", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("lie_learn.representations.SO3.pinchon_hoggan.pinchon_hoggan.apply_z_rotation_block", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   goto __pyx_L2;
   __pyx_L0:;
@@ -1456,7 +1460,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   __pyx_t_9 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_C.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_t_9, &amp;__Pyx_TypeInfo_nn___pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_C.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_t_9, &amp;__Pyx_TypeInfo_nn___pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_C = ((PyArrayObject *)Py_None); <span class='pyx_macro_api'>__Pyx_INCREF</span>(Py_None); __pyx_pybuffernd_C.rcbuffer-&gt;pybuffer.buf = NULL;
       __PYX_ERR(0, 104, __pyx_L1_error)
     } else {__pyx_pybuffernd_C.diminfo[0].strides = __pyx_pybuffernd_C.rcbuffer-&gt;pybuffer.strides[0]; __pyx_pybuffernd_C.diminfo[0].shape = __pyx_pybuffernd_C.rcbuffer-&gt;pybuffer.shape[0]; __pyx_pybuffernd_C.diminfo[1].strides = __pyx_pybuffernd_C.rcbuffer-&gt;pybuffer.strides[1]; __pyx_pybuffernd_C.diminfo[1].shape = __pyx_pybuffernd_C.rcbuffer-&gt;pybuffer.shape[1];
@@ -1596,7 +1600,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   __pyx_t_10 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_S.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_t_10, &amp;__Pyx_TypeInfo_nn___pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_S.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_t_10, &amp;__Pyx_TypeInfo_nn___pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_S = ((PyArrayObject *)Py_None); <span class='pyx_macro_api'>__Pyx_INCREF</span>(Py_None); __pyx_pybuffernd_S.rcbuffer-&gt;pybuffer.buf = NULL;
       __PYX_ERR(0, 105, __pyx_L1_error)
     } else {__pyx_pybuffernd_S.diminfo[0].strides = __pyx_pybuffernd_S.rcbuffer-&gt;pybuffer.strides[0]; __pyx_pybuffernd_S.diminfo[0].shape = __pyx_pybuffernd_S.rcbuffer-&gt;pybuffer.shape[0]; __pyx_pybuffernd_S.diminfo[1].strides = __pyx_pybuffernd_S.rcbuffer-&gt;pybuffer.strides[1]; __pyx_pybuffernd_S.diminfo[1].shape = __pyx_pybuffernd_S.rcbuffer-&gt;pybuffer.shape[1];
@@ -1625,7 +1629,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
 <pre class='cython code score-0 '>    __pyx_v_irrep_ind = 0;
 </pre><pre class="cython line score-0" onclick='toggleDiv(this)'>+<span class="">117</span>:         <span class="n">irrep</span> <span class="o">=</span> <span class="n">irreps</span><span class="p">[</span><span class="n">irrep_ind</span><span class="p">]</span></pre>
 <pre class='cython code score-0 '>    __pyx_t_13 = __pyx_v_irrep_ind;
-    __pyx_v_irrep = (*__Pyx_BufPtrStrided1d(__pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t *, __pyx_pybuffernd_irreps.rcbuffer-&gt;pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_irreps.diminfo[0].strides));
+    __pyx_v_irrep = (*__Pyx_BufPtrStrided1d(__pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t *, __pyx_pybuffernd_irreps.rcbuffer-&gt;pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_irreps.diminfo[0].strides));
 </pre><pre class="cython line score-0" onclick='toggleDiv(this)'>+<span class="">118</span>:         <span class="n">center</span> <span class="o">=</span> <span class="n">irrep</span></pre>
 <pre class='cython code score-0 '>    __pyx_v_center = __pyx_v_irrep;
 </pre><pre class="cython line score-0" onclick='toggleDiv(this)'>+<span class="">119</span>:         <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Xs1</span><span class="p">):</span>  <span class="c"># Xs0):  # X.shape[0]):</span></pre>
@@ -1643,7 +1647,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
 <pre class='cython code score-0 '>        __pyx_v_irrep_ind = (__pyx_v_irrep_ind + 1);
 </pre><pre class="cython line score-0" onclick='toggleDiv(this)'>+<span class="">123</span>:                 <span class="n">irrep</span> <span class="o">=</span> <span class="n">irreps</span><span class="p">[</span><span class="n">irrep_ind</span><span class="p">]</span>  <span class="c"># Get its weight from the list</span></pre>
 <pre class='cython code score-0 '>        __pyx_t_17 = __pyx_v_irrep_ind;
-        __pyx_v_irrep = (*__Pyx_BufPtrStrided1d(__pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t *, __pyx_pybuffernd_irreps.rcbuffer-&gt;pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_irreps.diminfo[0].strides));
+        __pyx_v_irrep = (*__Pyx_BufPtrStrided1d(__pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t *, __pyx_pybuffernd_irreps.rcbuffer-&gt;pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_irreps.diminfo[0].strides));
 </pre><pre class="cython line score-0" onclick='toggleDiv(this)'>+<span class="">124</span>:                 <span class="n">center</span> <span class="o">=</span> <span class="n">coord</span> <span class="o">+</span> <span class="n">irrep</span>     <span class="c"># Compute the new center</span></pre>
 <pre class='cython code score-0 '>        __pyx_v_center = (__pyx_v_coord + __pyx_v_irrep);
 </pre><pre class="cython line score-0" onclick='toggleDiv(this)'>+<span class="">125</span>:                 <span class="n">offset</span> <span class="o">=</span> <span class="o">-</span><span class="n">irrep</span>            <span class="c"># equivalent to offset=coord-center;</span></pre>
@@ -1670,10 +1674,10 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
 </pre><pre class="cython line score-0">&#xA0;<span class="">133</span>: </pre>
 <pre class="cython line score-0" onclick='toggleDiv(this)'>+<span class="">134</span>:             <span class="n">coord1_block</span> <span class="o">=</span> <span class="n">c2b</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span></pre>
 <pre class='cython code score-0 '>      __pyx_t_19 = __pyx_v_coord;
-      __pyx_v_coord1_block = (*__Pyx_BufPtrStrided1d(__pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t *, __pyx_pybuffernd_c2b.rcbuffer-&gt;pybuffer.buf, __pyx_t_19, __pyx_pybuffernd_c2b.diminfo[0].strides));
+      __pyx_v_coord1_block = (*__Pyx_BufPtrStrided1d(__pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t *, __pyx_pybuffernd_c2b.rcbuffer-&gt;pybuffer.buf, __pyx_t_19, __pyx_pybuffernd_c2b.diminfo[0].strides));
 </pre><pre class="cython line score-0" onclick='toggleDiv(this)'>+<span class="">135</span>:             <span class="n">coord2_block</span> <span class="o">=</span> <span class="n">c2b</span><span class="p">[</span><span class="n">center</span> <span class="o">-</span> <span class="n">offset</span><span class="p">]</span></pre>
 <pre class='cython code score-0 '>      __pyx_t_20 = (__pyx_v_center - __pyx_v_offset);
-      __pyx_v_coord2_block = (*__Pyx_BufPtrStrided1d(__pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t *, __pyx_pybuffernd_c2b.rcbuffer-&gt;pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_c2b.diminfo[0].strides));
+      __pyx_v_coord2_block = (*__Pyx_BufPtrStrided1d(__pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_INT_TYPE_t *, __pyx_pybuffernd_c2b.rcbuffer-&gt;pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_c2b.diminfo[0].strides));
 </pre><pre class="cython line score-0">&#xA0;<span class="">136</span>: </pre>
 <pre class="cython line score-0">&#xA0;<span class="">137</span>:             <span class="c"># Compute the value of the transformed coordinate</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">138</span>:             <span class="c"># Note: we&#39;re always adding *two* values, even when offset=0 and hence there is only</span></pre>
@@ -1688,7 +1692,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
 /* … */
       __pyx_t_29 = __pyx_v_vec;
       __pyx_t_30 = __pyx_v_coord1_block;
-      *__Pyx_BufPtrStrided2d(__pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t *, __pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer.buf, __pyx_t_29, __pyx_pybuffernd_X_out.diminfo[0].strides, __pyx_t_30, __pyx_pybuffernd_X_out.diminfo[1].strides) = (((*__Pyx_BufPtrStrided2d(__pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t *, __pyx_pybuffernd_C.rcbuffer-&gt;pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_C.diminfo[0].strides, __pyx_t_22, __pyx_pybuffernd_C.diminfo[1].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t *, __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_X.diminfo[0].strides, __pyx_t_24, __pyx_pybuffernd_X.diminfo[1].strides))) - ((__pyx_v_offset_sign * (*__Pyx_BufPtrStrided2d(__pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t *, __pyx_pybuffernd_S.rcbuffer-&gt;pybuffer.buf, __pyx_t_25, __pyx_pybuffernd_S.diminfo[0].strides, __pyx_t_26, __pyx_pybuffernd_S.diminfo[1].strides))) * (*__Pyx_BufPtrStrided2d(__pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t *, __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.buf, __pyx_t_27, __pyx_pybuffernd_X.diminfo[0].strides, __pyx_t_28, __pyx_pybuffernd_X.diminfo[1].strides))));
+      *__Pyx_BufPtrStrided2d(__pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t *, __pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer.buf, __pyx_t_29, __pyx_pybuffernd_X_out.diminfo[0].strides, __pyx_t_30, __pyx_pybuffernd_X_out.diminfo[1].strides) = (((*__Pyx_BufPtrStrided2d(__pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t *, __pyx_pybuffernd_C.rcbuffer-&gt;pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_C.diminfo[0].strides, __pyx_t_22, __pyx_pybuffernd_C.diminfo[1].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t *, __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_X.diminfo[0].strides, __pyx_t_24, __pyx_pybuffernd_X.diminfo[1].strides))) - ((__pyx_v_offset_sign * (*__Pyx_BufPtrStrided2d(__pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t *, __pyx_pybuffernd_S.rcbuffer-&gt;pybuffer.buf, __pyx_t_25, __pyx_pybuffernd_S.diminfo[0].strides, __pyx_t_26, __pyx_pybuffernd_S.diminfo[1].strides))) * (*__Pyx_BufPtrStrided2d(__pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t *, __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.buf, __pyx_t_27, __pyx_pybuffernd_X.diminfo[0].strides, __pyx_t_28, __pyx_pybuffernd_X.diminfo[1].strides))));
     }
   }
 </pre><pre class="cython line score-0" onclick='toggleDiv(this)'>+<span class="">143</span>:                                        <span class="o">-</span> <span class="n">offset_sign</span> <span class="o">*</span> <span class="n">S</span><span class="p">[</span><span class="n">abs_offset</span><span class="p">,</span> <span class="n">vec</span><span class="p">]</span> <span class="o">*</span> <span class="n">X</span><span class="p">[</span><span class="n">vec</span><span class="p">,</span> <span class="n">coord2_block</span><span class="p">]</span></pre>
@@ -1709,7 +1713,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
 <pre class="cython line score-0">&#xA0;<span class="">150</span>: <span class="nd">@cython</span><span class="o">.</span><span class="n">nonecheck</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">151</span>: <span class="nd">@cython</span><span class="o">.</span><span class="n">boundscheck</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></pre>
 <pre class="cython line score-25" onclick='toggleDiv(this)'>+<span class="">152</span>: <span class="k">cdef</span> <span class="nf">apply_J_block</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">FLOAT_TYPE_t</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="mf">2</span><span class="p">]</span> <span class="n">X</span><span class="p">,</span></pre>
-<pre class='cython code score-25 '>static PyObject *__pyx_f_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_J_block(PyArrayObject *__pyx_v_X, PyObject *__pyx_v_J_block, PyArrayObject *__pyx_v_X_out) {
+<pre class='cython code score-25 '>static PyObject *__pyx_f_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_apply_J_block(PyArrayObject *__pyx_v_X, PyObject *__pyx_v_J_block, PyArrayObject *__pyx_v_X_out) {
   int __pyx_v_l;
   int __pyx_v_k;
   int __pyx_v_rep_begin;
@@ -1740,12 +1744,12 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   __pyx_pybuffernd_X_out.rcbuffer = &amp;__pyx_pybuffer_X_out;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_X.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_X, &amp;__Pyx_TypeInfo_nn___pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 152, __pyx_L1_error)
+    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_X.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_X, &amp;__Pyx_TypeInfo_nn___pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 152, __pyx_L1_error)
   }
   __pyx_pybuffernd_X.diminfo[0].strides = __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.strides[0]; __pyx_pybuffernd_X.diminfo[0].shape = __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.shape[0]; __pyx_pybuffernd_X.diminfo[1].strides = __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.strides[1]; __pyx_pybuffernd_X.diminfo[1].shape = __pyx_pybuffernd_X.rcbuffer-&gt;pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_X_out, &amp;__Pyx_TypeInfo_nn___pyx_t_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 152, __pyx_L1_error)
+    if (unlikely(<span class='pyx_c_api'>__Pyx_GetBufferAndValidate</span>(&amp;__pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer, (PyObject*)__pyx_v_X_out, &amp;__Pyx_TypeInfo_nn___pyx_t_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_FLOAT_TYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 152, __pyx_L1_error)
   }
   __pyx_pybuffernd_X_out.diminfo[0].strides = __pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer.strides[0]; __pyx_pybuffernd_X_out.diminfo[0].shape = __pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer.shape[0]; __pyx_pybuffernd_X_out.diminfo[1].strides = __pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer.strides[1]; __pyx_pybuffernd_X_out.diminfo[1].shape = __pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer.shape[1];
 /* … */
@@ -1764,7 +1768,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
     <span class='pyx_c_api'>__Pyx_SafeReleaseBuffer</span>(&amp;__pyx_pybuffernd_X.rcbuffer-&gt;pybuffer);
     <span class='pyx_c_api'>__Pyx_SafeReleaseBuffer</span>(&amp;__pyx_pybuffernd_X_out.rcbuffer-&gt;pybuffer);
   <span class='pyx_c_api'>__Pyx_ErrRestore</span>(__pyx_type, __pyx_value, __pyx_tb);}
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("representations.SO3.pinchon_hoggan.pinchon_hoggan.apply_J_block", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("lie_learn.representations.SO3.pinchon_hoggan.pinchon_hoggan.apply_J_block", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   goto __pyx_L2;
   __pyx_L0:;
@@ -2384,20 +2388,20 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
 <pre class="cython line score-0">&#xA0;<span class="">229</span>: </pre>
 <pre class="cython line score-28" onclick='toggleDiv(this)'>+<span class="">230</span>: <span class="k">def</span> <span class="nf">make_c2b</span><span class="p">(</span><span class="n">irreps</span><span class="p">):</span></pre>
 <pre class='cython code score-28 '>/* Python wrapper */
-static PyObject *__pyx_pw_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_3make_c2b(PyObject *__pyx_self, PyObject *__pyx_v_irreps); /*proto*/
-static PyMethodDef __pyx_mdef_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_3make_c2b = {"make_c2b", (PyCFunction)__pyx_pw_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_3make_c2b, METH_O, 0};
-static PyObject *__pyx_pw_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_3make_c2b(PyObject *__pyx_self, PyObject *__pyx_v_irreps) {
+static PyObject *__pyx_pw_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_3make_c2b(PyObject *__pyx_self, PyObject *__pyx_v_irreps); /*proto*/
+static PyMethodDef __pyx_mdef_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_3make_c2b = {"make_c2b", (PyCFunction)__pyx_pw_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_3make_c2b, METH_O, 0};
+static PyObject *__pyx_pw_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_3make_c2b(PyObject *__pyx_self, PyObject *__pyx_v_irreps) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("make_c2b (wrapper)", 0);
-  __pyx_r = __pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_2make_c2b(__pyx_self, ((PyObject *)__pyx_v_irreps));
+  __pyx_r = __pyx_pf_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_2make_c2b(__pyx_self, ((PyObject *)__pyx_v_irreps));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_2make_c2b(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_irreps) {
+static PyObject *__pyx_pf_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_2make_c2b(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_irreps) {
   PyObject *__pyx_v_c2b = NULL;
   PyObject *__pyx_v_irrep_begin = NULL;
   PyObject *__pyx_v_l = NULL;
@@ -2419,7 +2423,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_9);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_12);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_13);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("representations.SO3.pinchon_hoggan.pinchon_hoggan.make_c2b", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("lie_learn.representations.SO3.pinchon_hoggan.pinchon_hoggan.make_c2b", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_v_c2b);
@@ -2438,7 +2442,7 @@ static PyObject *__pyx_pf_15representations_3SO3_14pinchon_hoggan_14pinchon_hogg
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_tuple__34);
   <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_tuple__34);
 /* … */
-  __pyx_t_2 = PyCFunction_NewEx(&amp;__pyx_mdef_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_3make_c2b, NULL, __pyx_n_s_representations_SO3_pinchon_hogg); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 230, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&amp;__pyx_mdef_9lie_learn_15representations_3SO3_14pinchon_hoggan_14pinchon_hoggan_3make_c2b, NULL, __pyx_n_s_lie_learn_representations_SO3_pi); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 230, __pyx_L1_error)
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_make_c2b, __pyx_t_2) &lt; 0) __PYX_ERR(0, 230, __pyx_L1_error)
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
