@@ -4,6 +4,7 @@ import setuptools.command.install
 from Cython.Build import cythonize
 import requests
 import os
+import numpy as np
 
 
 # code to download from google Drive
@@ -48,7 +49,7 @@ class PostInstallCommand(setuptools.command.install.install):
         google_drive_file_id = '0B5e7DAOiLEZwSkdfXzBYT29Nc3c'
         destination = os.path.join(self.install_lib, 'lie_learn/representations/SO3/pinchon_hoggan/J_dense_0-278.npy')
 
-        print("Start to download file ID {} for google drive into {}".format(google_drive_file_id, destination))
+        print("Start to download file ID {} from google drive into {}".format(google_drive_file_id, destination))
 
         try:
             download_file_from_google_drive(google_drive_file_id, destination)
@@ -62,4 +63,5 @@ setup(
     packages=find_packages(),
     ext_modules=cythonize('lie_learn/**/*.pyx'),
     cmdclass={ 'install': PostInstallCommand },
+    include_dirs=[np.get_include()],
 )
