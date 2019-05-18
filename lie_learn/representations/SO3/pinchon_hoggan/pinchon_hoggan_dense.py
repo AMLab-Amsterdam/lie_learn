@@ -8,7 +8,7 @@ import numpy as np
 from scipy.linalg import block_diag
 
 # Load the J-matrices, which are stored in the same folder as this file
-Jd = np.load(os.path.join(os.path.dirname(__file__), 'J_dense_0-278.npy'), encoding='latin1')
+Jd = np.load(os.path.join(os.path.dirname(__file__), 'J_dense_0-278.npy'), encoding='latin1', allow_pickle=True)
 
 
 def SO3_irreps(g, irreps):

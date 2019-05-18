@@ -85,7 +85,7 @@ def block_sh_ph(L_max, theta, phi):
     # Rotate Yb:
     c2b = make_c2b(irreps)
     import os
-    J_block = np.load(os.path.join(os.path.dirname(__file__), 'pinchon_hoggan', 'J_block_0-278.npy'))
+    J_block = np.load(os.path.join(os.path.dirname(__file__), 'pinchon_hoggan', 'J_block_0-278.npy'), allow_pickle=True)
     J_block = list(J_block[irreps])
 
     g = np.zeros((theta.size, 3))

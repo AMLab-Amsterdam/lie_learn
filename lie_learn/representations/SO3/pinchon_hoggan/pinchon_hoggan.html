@@ -411,7 +411,7 @@ body.cython { font-family: courier; font-size: 12; }
 </pre><pre class="cython line score-0">&#xA0;<span class="">017</span>: </pre>
 <pre class="cython line score-0">&#xA0;<span class="">018</span>: <span class="c"># Load the J-matrices, which are stored in the same folder as this file</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">019</span>: <span class="c">#import os</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">020</span>: <span class="c">#Jb = np.load(os.path.join(os.path.dirname(__file__), &#39;J_block_0-478.npy&#39;))</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">020</span>: <span class="c">#Jb = np.load(os.path.join(os.path.dirname(__file__), &#39;J_block_0-478.npy&#39;), allow_pickle=True)</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">021</span>: </pre>
 <pre class="cython line score-11" onclick='toggleDiv(this)'>+<span class="">022</span>: <span class="n">FLOAT_TYPE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span></pre>
 <pre class='cython code score-11 '>  __pyx_t_2 = <span class='pyx_c_api'>__Pyx_GetModuleGlobalName</span>(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 22, __pyx_L1_error)
