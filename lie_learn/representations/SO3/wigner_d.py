@@ -160,7 +160,10 @@ def wigner_d_naive(l, m, n, beta):
     :return: d^l_mn(beta) in the TODO: what basis? complex, quantum(?), centered, cs(?)
     """
     from scipy.special import eval_jacobi
-    from scipy.misc import factorial
+    try:
+        from scipy.misc import factorial
+    except:
+        from scipy.special import factorial
 
     from sympy.functions.special.polynomials import jacobi, jacobi_normalized
     from sympy.abc import j, a, b, x
@@ -238,7 +241,10 @@ def wigner_d_naive_v3(l, m, n, approx_lim=1000000):
     addition m=0, we can use the ordinary legendre polynomials.
     """
     from scipy.special import jv, legendre, sph_harm, jacobi
-    from scipy.misc import factorial, comb
+    try:
+        from scipy.misc import factorial, comb
+    except:
+        from scipy.special import factorial, comb
     from numpy import floor, sqrt, sin, cos, exp, power
     from math import pi
     from scipy.special import jacobi

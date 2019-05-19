@@ -1,8 +1,10 @@
 
 import numpy as np
 from scipy.special import sph_harm, lpmv
-from scipy.misc import factorial
-
+try:
+    from scipy.misc import factorial
+except:
+    from scipy.special import factorial
 
 def sh(l, m, theta, phi, field='real', normalization='quantum', condon_shortley=True):
     if field == 'real':
