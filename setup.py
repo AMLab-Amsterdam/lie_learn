@@ -1,5 +1,13 @@
 #pylint: disable=C
-from setuptools import setup, find_packages
+import sys
+from setuptools import dist, setup, find_packages
+
+if sys.version_info[0] < 3:
+    dist.Distribution().fetch_build_eggs(['Cython', 'numpy<1.17', 'requests'])
+else:
+    dist.Distribution().fetch_build_eggs(['Cython', 'numpy', 'requests'])
+
+
 import setuptools.command.install
 from Cython.Build import cythonize
 import requests
@@ -45,6 +53,7 @@ class PostInstallCommand(setuptools.command.install.install):
 
     def run(self):
         setuptools.command.install.install.run(self)
+        setuptools.command.install.install.do_egg_install(self)
 
         google_drive_file_id = '0B5e7DAOiLEZwSkdfXzBYT29Nc3c'
         destination = os.path.join(self.install_lib, 'lie_learn/representations/SO3/pinchon_hoggan/J_dense_0-278.npy')
@@ -64,4 +73,12 @@ setup(
     ext_modules=cythonize('lie_learn/**/*.pyx'),
     cmdclass={ 'install': PostInstallCommand },
     include_dirs=[np.get_include()],
+    install_requires=[
+        'cython',
+        'requests',
+    ],
+    extras_require={
+        ':python_version<"3.0"': ['scipy<1.3', 'numpy<1.17'],
+        ':python_version>="3.0"': ['scipy', 'numpy'],
+    },
 )
