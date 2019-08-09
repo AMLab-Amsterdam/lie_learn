@@ -7,6 +7,11 @@ import os
 import numpy as np
 from scipy.linalg import block_diag
 
+# J matrices come from this paper
+# Rotation matrices for real spherical harmonics: general rotations of atomic orbitals in space-fixed axes
+# Didier Pinchon1 and Philip E Hoggan2
+# https://iopscience.iop.org/article/10.1088/1751-8113/40/7/011/
+
 # Load the J-matrices, which are stored in the same folder as this file
 Jd = np.load(os.path.join(os.path.dirname(__file__), 'J_dense_0-278.npy'), encoding='latin1', allow_pickle=True)
 
@@ -65,6 +70,9 @@ def rot_mat(alpha, beta, gamma, l, J):
 
     The result is the same as the wignerD_mat function by Johann Goetz,
     when the sign of alpha and gamma is flipped.
+
+    The forementioned function is here:
+    https://sites.google.com/site/theodoregoetz/notes/wignerdfunction
     """
     Xa = z_rot_mat(alpha, l)
     Xb = z_rot_mat(beta, l)
