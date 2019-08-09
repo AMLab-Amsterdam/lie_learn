@@ -17,7 +17,7 @@ from lie_learn.broadcasting import generalized_broadcast
 
 # Load the J-matrices, which are stored in the same folder as this file
 #import os
-#Jb = np.load(os.path.join(os.path.dirname(__file__), 'J_block_0-478.npy'))
+#Jb = np.load(os.path.join(os.path.dirname(__file__), 'J_block_0-478.npy'), allow_pickle=True)
 
 FLOAT_TYPE = np.float64
 ctypedef np.float64_t FLOAT_TYPE_t
