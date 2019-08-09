@@ -10,9 +10,16 @@ Note: There are many normalization and phase conventions for both the real and c
 - Fit Harmonic Exponential Families on the sphere (probability module; not sure code is still working)
 
 # Installation
-To install, run:
+To install, clone the repository and run:
 
-$ python setup.py install
+```
+python setup.py install
+```
+
+Or run:
+```
+pip install git+https://github.com/AMLab-Amsterdam/lie_learn
+```
 
 This should download the J matrices and compile Cython modules. 
 
