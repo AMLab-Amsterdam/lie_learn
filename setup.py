@@ -9,6 +9,7 @@ else:
 
 
 import setuptools.command.install
+import setuptools.command.develop
 from Cython.Build import cythonize
 import requests
 import os
@@ -67,11 +68,29 @@ class PostInstallCommand(setuptools.command.install.install):
             raise
 
 
+class PostDevelopCommand(setuptools.command.develop.develop):
+    """Post-installation for develop mode."""
+
+    def run(self):
+        setuptools.command.develop.develop.run(self)
+
+        google_drive_file_id = '0B5e7DAOiLEZwSkdfXzBYT29Nc3c'
+        destination = os.path.join('lie_learn/representations/SO3/pinchon_hoggan/J_dense_0-278.npy')
+
+        print("Start to download file ID {} from google drive into {}".format(google_drive_file_id, destination))
+
+        try:
+            download_file_from_google_drive(google_drive_file_id, destination)
+        except:
+            print("Error during the download")
+            raise
+
+
 setup(
     name='lie_learn',
     packages=find_packages(),
     ext_modules=cythonize('lie_learn/**/*.pyx'),
-    cmdclass={ 'install': PostInstallCommand },
+    cmdclass={'install': PostInstallCommand, 'develop': PostDevelopCommand},
     include_dirs=[np.get_include()],
     install_requires=[
         'cython',
