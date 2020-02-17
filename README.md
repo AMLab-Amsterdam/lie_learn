@@ -36,4 +36,4 @@ For questions and comments, feel free to contact Taco Cohen (http://ta.co.nl).
 
 [4] Cohen, T. S., & Welling, M. (2017). Steerable CNNs. In ICLR.
 
-[5] Cohen, T. S., & Geiger, M. (2017). Convolutional Networks for Spherical Signals. In ICML Workshop on Principled Approaches to Deep Learning.
+[5] T.S. Cohen, M. Geiger, J. Koehler, M. Welling (2017). Convolutional Networks for Spherical Signals. In ICML Workshop on Principled Approaches to Deep Learning.
