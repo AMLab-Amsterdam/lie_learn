@@ -88,3 +88,8 @@ tramp
 *.imc
 *.mat
 *.idea
+
+*.egg-info
+dist
+build
+*.html
