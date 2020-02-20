@@ -2,19 +2,19 @@
 # This code is not very optimized,
 # and can never become very efficient because it cannot exploit the sparsity of the J matrix.
 
-import os
 
 import numpy as np
 from scipy.linalg import block_diag
+
+# Load the J-matrices, which are stored in the same folder as this file
+import download
 
 # J matrices come from this paper
 # Rotation matrices for real spherical harmonics: general rotations of atomic orbitals in space-fixed axes
 # Didier Pinchon1 and Philip E Hoggan2
 # https://iopscience.iop.org/article/10.1088/1751-8113/40/7/011/
 
-# Load the J-matrices, which are stored in the same folder as this file
-Jd = np.load(os.path.join(os.path.dirname(__file__), 'J_dense_0-278.npy'), encoding='latin1', allow_pickle=True)
-
+Jd = download.download('https://github.com/AMLab-Amsterdam/lie_learn/releases/download/v1.0/J_dense_0-278.npy')
 
 def SO3_irreps(g, irreps):
     global Jd
