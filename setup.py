@@ -1,7 +1,6 @@
 # pylint: disable=missing-docstring
 import sys
 import glob
-import os.path
 
 from setuptools import dist, find_packages, setup, Extension
 
@@ -22,8 +21,8 @@ dist.Distribution().fetch_build_eggs(setup_requires_list)
 import numpy as np
 
 ext = '.pyx' if use_cython else '.c'
-files = glob.glob('lie_learn/**/*' + ext)
-extensions = [Extension(file.split('.')[0], [file]) for file in files]
+files = glob.glob('lie_learn/**/*' + ext, recursive=True)
+extensions = [Extension(file.split('.')[0].replace('/', '.'), [file]) for file in files]
 if use_cython:
     from Cython.Build import cythonize
 
@@ -31,11 +30,11 @@ if use_cython:
 
 setup(
     name='lie_learn',
-    version="0.0.1-beta.1",
+    version="0.0.1-rc.0",
     description="A python package that knows how to do various tricky computations related to Lie groups and "
                 "manifolds (mainly the sphere S2 and rotation group SO3).",
     url="https://github.com/AMLab-Amsterdam/lie_learn",
-    packages=find_packages(exclude=("tests",)),
+    packages=find_packages(exclude=["tests.*", "tests"]),
     ext_modules=extensions,
     include_dirs=[np.get_include()],
     setup_requires=setup_requires_list,
