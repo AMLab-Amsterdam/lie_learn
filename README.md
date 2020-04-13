@@ -10,18 +10,15 @@ Note: There are many normalization and phase conventions for both the real and c
 - Fit Harmonic Exponential Families on the sphere (probability module; not sure code is still working)
 
 # Installation
-To install, clone the repository and run:
+lie_learn can be installed from pypi using:
 
 ```
-python setup.py install
+pip install lie_learn
 ```
 
-Or run:
-```
-pip install git+https://github.com/AMLab-Amsterdam/lie_learn
-```
-
-This should download the J matrices and compile Cython modules. 
+Although cython is not a necesary dependency, if you have cython installed, cython will write new versions of the `*.c
+` files before compiling them into `*.so` during installation.
+ 
 
 # Feedback
 For questions and comments, feel free to contact Taco Cohen (http://ta.co.nl).
