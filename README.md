@@ -16,8 +16,9 @@ lie_learn can be installed from pypi using:
 pip install lie_learn
 ```
 
-Although cython is not a necesary dependency, if you have cython installed, cython will write new versions of the `*.c
-` files before compiling them into `*.so` during installation.
+Although cython is not a necessary dependency, if you have cython installed, cython will write new versions of the `*.c
+` files before compiling them into `*.so` during installation. To use lie_learn, you will need a c compiler which is
+ available to python setuptools.
  
 
 # Feedback
