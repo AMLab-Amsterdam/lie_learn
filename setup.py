@@ -30,7 +30,7 @@ if use_cython:
 
 setup(
     name='lie_learn',
-    version="0.0.1-rc.0",
+    version="0.0.1.post1",
     description="A python package that knows how to do various tricky computations related to Lie groups and "
                 "manifolds (mainly the sphere S2 and rotation group SO3).",
     url="https://github.com/AMLab-Amsterdam/lie_learn",
@@ -40,7 +40,9 @@ setup(
     setup_requires=setup_requires_list,
     install_requires=[
         'requests',
+        'numpy ; python_version>="3.0"',
         'scipy ; python_version>="3.0"',
+        'numpy<1.17 ; python_version<"3.0"',
         'scipy<1.3 ; python_version<"3.0"',
     ],
     include_package_data=True,
