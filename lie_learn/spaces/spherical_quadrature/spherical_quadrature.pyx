@@ -31,7 +31,7 @@ def estimate_spherical_quadrature_weights(sampling_set, max_bandwidth,
     phi = sampling_set[:, 1]
 
     if verbose:
-        print 'Computing index arrays...'
+        print('Computing index arrays...')
 
     i = 0
     for l in range(N + 1):
@@ -41,22 +41,22 @@ def estimate_spherical_quadrature_weights(sampling_set, max_bandwidth,
             i += 1
 
     if verbose:
-        print 'Computing spherical harmonics...'
+        print('Computing spherical harmonics...')
     Y = rsh(l_array, m_array, theta[None, :], phi[None, :],
             normalization=normalization, condon_shortley=condon_shortley)
 
     if verbose:
-        print 'Computing least squares input'
+        print('Computing least squares input')
     B = np.empty((N_total ** 2, M))
     t = np.empty(N_total ** 2)
     i = 0
 
-    #print M, N, N_total
-    #print theta[None, :].shape
-    #print phi[None, :].shape
-    #print Y.shape
-    #print B.shape
-    #print t.shape
+    #print(M, N, N_total)
+    #print(theta[None, :].shape)
+    #print(phi[None, :].shape)
+    #print(Y.shape)
+    #print(B.shape)
+    #print(t.shape)
 
     for l in range(N + 1):
         for m in range(-l, l + 1):
@@ -68,5 +68,5 @@ def estimate_spherical_quadrature_weights(sampling_set, max_bandwidth,
                     i += 1
 
     if verbose:
-        print 'Computing least squares solution'
+        print('Computing least squares solution')
     return np.linalg.lstsq(B, t)
