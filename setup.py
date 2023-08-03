@@ -1,4 +1,5 @@
 # pylint: disable=missing-docstring
+import os
 import sys
 import glob
 
@@ -22,7 +23,8 @@ import numpy as np
 
 ext = '.pyx' if use_cython else '.c'
 files = glob.glob('lie_learn/**/*' + ext, recursive=True)
-extensions = [Extension(file.split('.')[0].replace('/', '.'), [file]) for file in files]
+
+extensions = [Extension(file.split('.')[0].replace(os.sep, '.'), [file]) for file in files]
 if use_cython:
     from Cython.Build import cythonize
 
