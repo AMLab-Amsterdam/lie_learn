@@ -9,8 +9,8 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lie_learn"
-version = "0.0.1.post1"
+name = "lie_learn_escience"
+version = "0.0.2"
 description = "A python package that knows how to do various tricky computations related to Lie groups and manifolds (mainly the sphere S2 and rotation group SO3)."
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -21,7 +21,10 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.6",
   "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
 ]
@@ -35,4 +38,4 @@ dependencies = [
 ]
 
 [project.urls]
-'Source Code' = "https://github.com/AMLab-Amsterdam/lie_learn"
+'Source Code' = "https://github.com/MALES-project/lie_learn2"
