@@ -89,6 +89,7 @@ tramp
 *.mat
 *.idea
 
+.eggs
 *.egg-info
 dist
 build
