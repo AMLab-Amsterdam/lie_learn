@@ -22,7 +22,7 @@ from lie_learn.broadcasting import generalized_broadcast
 FLOAT_TYPE = np.float64
 ctypedef np.float64_t FLOAT_TYPE_t
 INT_TYPE = np.int
-ctypedef np.int_t INT_TYPE_t
+ctypedef np.int64_t INT_TYPE_t
 
 
 def apply_rotation_block(g, X, irreps, c2b, J_block, l_max, X_out=None):
