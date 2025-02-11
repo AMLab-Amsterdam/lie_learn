@@ -413,7 +413,7 @@ def change_coordinates(g, p_from, p_to, units='rad', perform_checks=False):
 
             elif euler_type == 2:
                 # TODO
-                print "Euler Type 2 Singularity Check not implemented"
+                print("Euler Type 2 Singularity Check not implemented")
                 #sing_chk=[find(np.abs(theta*180/np.pi)<0.1)find(np.abs(theta*180/np.pi-180)<0.1)find(np.abs(theta*180/np.pi-360))<0.1]
                 #sing_chk=sort(sing_chk(sing_chk>0))
                 #if size(sing_chk,1)>=1:
