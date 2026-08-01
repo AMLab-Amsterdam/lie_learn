@@ -10,9 +10,6 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    environment: release
-    permissions:
-      id-token: write 
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13, macos-14]
@@ -34,9 +31,42 @@ jobs:
           CIBW_SKIP: "*_i686 *-musllinux_*"
       - uses: actions/upload-artifact@v4
         with:
-          name: lie_learn-${{ matrix.os }}-${{ strategy.job-index }}
+          name: wheels-${{ matrix.os }}
           path: ./dist/*.whl
 
+  build_sdist:
+    name: Build sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+
+      - name: Build sdist
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: ./dist/*.tar.gz
+
+  publish:
+    name: Publish to PyPI
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+
       - name: Publish package
-        if: matrix.os == 'ubuntu-latest'
         uses: pypa/gh-action-pypi-publish@release/v1
